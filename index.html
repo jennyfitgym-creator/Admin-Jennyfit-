@@ -369,7 +369,8 @@
             
             status.style.display = 'block';
             try {
-                const res = await fetch('/api/enviar-notificacion', {
+                // 🚨 AQUÍ ESTÁ LA CORRECCIÓN: Apuntando a la URL principal de la app
+                const res = await fetch('https://jennyv2.vercel.app/api/enviar-notificacion', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ title, body, image, topic: 'noticias_jennyfit', secret: 'JENNYFIT_ADMIN_2026' })
