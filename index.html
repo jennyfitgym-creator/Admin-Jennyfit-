@@ -9,23 +9,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0b0d0c;
-            --card: #18181b;
-            --card-sub: #121215;
-            --primary: #39FF14;
-            --text: #f4f4f5;
-            --muted: #a1a1aa;
-            --danger: #ff2a2a;
-            --gold: #f59e0b;
-            --border: rgba(255, 255, 255, 0.1);
+            --bg: #0b0d0c; --card: #18181b; --card-sub: #121215; --primary: #39FF14;
+            --text: #f4f4f5; --muted: #a1a1aa; --danger: #ff2a2a; --gold: #f59e0b; --border: rgba(255, 255, 255, 0.1);
         }
-        body {
-            margin: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            padding-bottom: 50px;
-        }
+        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: var(--text); padding-bottom: 50px; }
         
         /* LOGIN */
         #login-screen { display: flex; justify-content: center; align-items: center; height: 100vh; padding: 20px; box-sizing: border-box; }
@@ -33,7 +20,6 @@
         .logo-text { font-size: 2rem; font-weight: 900; color: var(--primary); margin-bottom: 10px; letter-spacing: -1px; }
         .subtitle { font-size: 0.9rem; color: var(--muted); margin-bottom: 30px; }
         .btn-google { display: flex; align-items: center; justify-content: center; gap: 10px; background: #ffffff; color: #18181b; border: none; border-radius: 50px; padding: 15px 20px; font-size: 1rem; font-weight: 800; font-family: inherit; cursor: pointer; width: 100%; transition: transform 0.2s; }
-        .btn-google:active { transform: scale(0.97); }
         .btn-google svg { width: 24px; height: 24px; }
         
         /* DASHBOARD */
@@ -41,35 +27,46 @@
         .header-admin { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; }
         .btn-logout { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         
-        .section-title { font-size: 1.2rem; font-weight: 900; color: var(--primary); margin-bottom: 15px; }
-        .btn-refresh { background: var(--card-sub); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; cursor: pointer; float: right;}
+        /* TABS */
+        .admin-tabs { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .admin-tab { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 10px 15px; border-radius: 10px; font-size: 0.85rem; font-weight: 800; cursor: pointer; white-space: nowrap; }
+        .admin-tab.active { background: var(--primary); color: #051405; border-color: var(--primary); }
         
-        /* CONTROLES */
-        .controls-bar { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border); }
-        .search-input { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: inherit; margin-bottom: 12px; box-sizing: border-box; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CONTROLES CLIENTES */
+        .section-title { font-size: 1.2rem; font-weight: 900; color: var(--primary); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;}
+        .btn-refresh { background: var(--card-sub); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
+        .search-input { width: 100%; padding: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: inherit; margin-bottom: 12px; box-sizing: border-box; }
         .filter-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 5px; }
         .filter-tab { background: var(--bg); border: 1px solid var(--border); color: var(--muted); padding: 8px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
         .filter-tab.active { background: var(--primary); color: #051405; border-color: var(--primary); }
 
-        /* CLIENTES */
+        /* TARJETAS CLIENTES */
         .client-card { background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 12px; padding: 15px; margin-bottom: 12px; }
         .client-card.status-active { border-left-color: var(--primary); }
         .client-card.status-warning { border-left-color: var(--gold); }
         .client-card.status-expired { border-left-color: var(--danger); }
-        
-        .client-name { font-size: 1rem; font-weight: 900; color: var(--text); margin-bottom: 4px; display: flex; justify-content: space-between;}
+        .client-name { font-size: 1rem; font-weight: 900; color: var(--text); margin-bottom: 4px; }
         .client-info { font-size: 0.8rem; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
         .client-info b { color: var(--text); }
-        
         .status-badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: bold; margin-bottom: 12px; }
         .badge-active { background: rgba(57, 255, 20, 0.1); color: var(--primary); border: 1px solid var(--primary); }
         .badge-warning { background: rgba(245, 158, 11, 0.1); color: var(--gold); border: 1px solid var(--gold); }
         .badge-expired { background: rgba(255, 42, 42, 0.1); color: var(--danger); border: 1px solid var(--danger); }
-        
         .card-actions { display: flex; gap: 8px; }
         .btn-card { flex: 1; padding: 8px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; cursor: pointer; text-align: center; border: none; font-family: inherit;}
         .btn-edit { background: var(--card-sub); border: 1px solid var(--text); color: var(--text); }
         .btn-block { background: rgba(255, 42, 42, 0.1); border: 1px solid var(--danger); color: var(--danger); }
+
+        /* FORMULARIOS (NOTIF Y CARRUSEL) */
+        .form-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 5px; font-weight: bold; }
+        .form-group input { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: white; box-sizing: border-box; font-family: inherit; }
+        .btn-primary { width: 100%; padding: 12px; background: var(--primary); color: #051405; border: none; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 0.9rem; }
         
         /* MODAL FECHA */
         #modal-fecha { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center; }
@@ -78,6 +75,13 @@
         .modal-box input { width: 100%; padding: 12px; margin: 15px 0; background: var(--bg); border: 1px solid var(--border); color: white; border-radius: 8px; font-family: inherit; box-sizing: border-box;}
         .btn-save-date { width: 100%; padding: 12px; background: var(--primary); color: #051405; border: none; border-radius: 8px; font-weight: 900; cursor: pointer; margin-bottom: 8px; }
         .btn-cancel { width: 100%; padding: 12px; background: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-weight: 900; cursor: pointer; }
+
+        /* LISTAS DE CARRUSEL */
+        .slide-item { background: var(--card-sub); border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        .slide-item img { width: 60px; height: 40px; object-fit: cover; border-radius: 4px; }
+        .slide-item-info { flex: 1; font-size: 0.75rem; }
+        .slide-item-info b { display: block; font-size: 0.8rem; color: var(--text); margin-bottom: 2px; }
+        .btn-delete { background: rgba(255, 42, 42, 0.1); border: 1px solid var(--danger); color: var(--danger); padding: 5px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
         .loading-text { text-align: center; color: var(--primary); font-weight: bold; margin-top: 20px; display: none; }
         .empty-state { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 20px; background: var(--card-sub); border-radius: 12px; }
@@ -91,12 +95,7 @@
             <div class="logo-text">JENNYFIT</div>
             <div class="subtitle">Panel de Administrador</div>
             <button id="btn-google" class="btn-google" onclick="iniciarSesionAdmin()">
-                <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                </svg>
+                <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
                 Iniciar Sesión con Google
             </button>
             <div id="login-loading" class="loading-text">⏳ Verificando...</div>
@@ -113,25 +112,78 @@
             <button class="btn-logout" onclick="cerrarSesionAdmin()">Salir</button>
         </div>
 
-        <div class="section-title">
-            👥 Gestión de Clientes
-            <button class="btn-refresh" onclick="cargarClientes()">🔄 Actualizar</button>
+        <!-- NAVEGACIÓN DE PESTAÑAS -->
+        <div class="admin-tabs">
+            <button class="admin-tab active" onclick="cambiarTabAdmin('clientes')">👥 Clientes</button>
+            <button class="admin-tab" onclick="cambiarTabAdmin('notificaciones')">📢 Notificaciones</button>
+            <button class="admin-tab" onclick="cambiarTabAdmin('carrusel')">🖼️ Carrusel</button>
         </div>
 
-        <!-- BARRA DE CONTROLES -->
-        <div class="controls-bar">
+        <!-- PESTAÑA: CLIENTES -->
+        <div id="tab-clientes" class="tab-panel active">
+            <div class="section-title">
+                Gestión de Clientes
+                <button class="btn-refresh" onclick="cargarClientes()">🔄 Actualizar</button>
+            </div>
+            
             <input type="text" id="search-client" class="search-input" placeholder="🔍 Buscar por nombre, cédula o correo..." oninput="filtrarYRenderizar()">
             
-            <div class="filter-tabs">
+            <div class="filter-tabs" style="margin-bottom: 15px;">
                 <button class="filter-tab active" data-filter="todos" onclick="cambiarFiltro('todos')">👥 Todos</button>
                 <button class="filter-tab" data-filter="activos" onclick="cambiarFiltro('activos')">✅ Activos</button>
                 <button class="filter-tab" data-filter="proximos" onclick="cambiarFiltro('proximos')">⚠️ Por Vencer</button>
                 <button class="filter-tab" data-filter="vencidos" onclick="cambiarFiltro('vencidos')">⛔ Vencidos</button>
             </div>
+
+            <div id="loading-clients" class="loading-text">⏳ Cargando clientes...</div>
+            <div id="clients-container"></div>
         </div>
-        
-        <div id="loading-clients" class="loading-text">⏳ Cargando clientes...</div>
-        <div id="clients-container"></div>
+
+        <!-- PESTAÑA: NOTIFICACIONES -->
+        <div id="tab-notificaciones" class="tab-panel">
+            <div class="section-title">📢 Enviar Notificación Push</div>
+            <div class="form-box">
+                <div class="form-group">
+                    <label>Título de la notificación:</label>
+                    <input type="text" id="notif-title" placeholder="Ej: ¡Nuevo récord en Jennyfit!">
+                </div>
+                <div class="form-group">
+                    <label>Mensaje:</label>
+                    <input type="text" id="notif-body" placeholder="Ej: Recuerda tomar agua hoy 💧">
+                </div>
+                <div class="form-group">
+                    <label>Enlace de la Imagen (Opcional, termina en .jpg o .png):</label>
+                    <input type="url" id="notif-image" placeholder="https://ejemplo.com/imagen.jpg">
+                </div>
+                <button class="btn-primary" onclick="enviarNotificacion()">🚀 Enviar a Todos los Clientes</button>
+                <div id="notif-status" class="loading-text">⏳ Enviando...</div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA: CARRUSEL -->
+        <div id="tab-carrusel" class="tab-panel">
+            <div class="section-title">🖼️ Gestión del Carrusel</div>
+            
+            <div class="form-box">
+                <div class="form-group">
+                    <label>URL de la Imagen (debe terminar en .jpg o .png):</label>
+                    <input type="url" id="carrusel-url" placeholder="https://i.postimg.cc/...">
+                </div>
+                <div class="form-group">
+                    <label>Texto (Opcional):</label>
+                    <input type="text" id="carrusel-texto" placeholder="Ej: Nuevo suplemento disponible">
+                </div>
+                <div class="form-group">
+                    <label>Segundos en pantalla:</label>
+                    <input type="number" id="carrusel-segundos" value="5" min="1">
+                </div>
+                <button class="btn-primary" onclick="agregarAlCarrusel()">➕ Añadir al Carrusel</button>
+            </div>
+
+            <div class="section-title" style="margin-top: 20px;">Publicidad Actual</div>
+            <div id="carrusel-lista"></div>
+        </div>
+
     </div>
 
     <!-- MODAL PARA EDITAR FECHA -->
@@ -149,7 +201,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDT0lieijjz2sxbu6PqaLmkrQ_HsDadK5M",
@@ -166,10 +218,10 @@
         const provider = new GoogleAuthProvider();
         const CORREO_ADMIN = "jennyfit.gym@gmail.com";
 
-        // Variables Globales
         let clientesArrayGlobal = [];
         let filtroActual = 'todos';
         let clienteEditandoUID = null;
+        let carruselItems = [];
 
         // Elementos DOM
         const loginScreen = document.getElementById('login-screen');
@@ -196,35 +248,36 @@
 
         window.cerrarSesionAdmin = async function() { await signOut(auth); };
 
-        window.cargarClientes = async function() {
-            loadingClients.style.display = 'block';
-            clientsContainer.innerHTML = '';
+        window.cambiarTabAdmin = function(tab) {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
             
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tab).classList.add('active');
+
+            if (tab === 'carrusel') cargarCarruselAdmin();
+        };
+
+        // --- MÓDULO CLIENTES ---
+        window.cargarClientes = async function() {
+            loadingClients.style.display = 'block'; clientsContainer.innerHTML = '';
             try {
                 const querySnapshot = await getDocs(collection(db, "usuarios"));
                 clientesArrayGlobal = [];
-
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
                     if (data.jennyfit_username) {
                         clientesArrayGlobal.push({
-                            uid: doc.id,
-                            nombre: data.jennyfit_username || 'Sin Nombre',
-                            email: data.jennyfit_google_email || 'Sin correo',
-                            cedula: data.jennyfit_user_cedula || 'N/A',
-                            telefono: data.jennyfit_user_telf || 'N/A',
+                            uid: doc.id, nombre: data.jennyfit_username, email: data.jennyfit_google_email || 'Sin correo',
+                            cedula: data.jennyfit_user_cedula || 'N/A', telefono: data.jennyfit_user_telf || 'N/A',
                             expiraMs: parseInt(data.jennyfit_membership_expiry || '0')
                         });
                     }
                 });
-
-                // Ordenar alfabéticamente
                 clientesArrayGlobal.sort((a, b) => a.nombre.localeCompare(b.nombre));
                 loadingClients.style.display = 'none';
-                
                 filtrarYRenderizar();
             } catch (error) {
-                console.error(error);
                 loadingClients.style.display = 'none';
                 clientsContainer.innerHTML = `<div class="empty-state" style="color: var(--danger);">Error al cargar la base de datos.</div>`;
             }
@@ -232,9 +285,7 @@
 
         window.cambiarFiltro = function(filtro) {
             filtroActual = filtro;
-            document.querySelectorAll('.filter-tab').forEach(btn => {
-                btn.classList.toggle('active', btn.getAttribute('data-filter') === filtro);
-            });
+            document.querySelectorAll('.filter-tab').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-filter') === filtro));
             filtrarYRenderizar();
         };
 
@@ -244,130 +295,168 @@
             clientsContainer.innerHTML = '';
             
             const clientesFiltrados = clientesArrayGlobal.filter(cliente => {
-                // Filtro de texto
-                const matchTexto = cliente.nombre.toLowerCase().includes(textoBusqueda) || 
-                                   cliente.email.toLowerCase().includes(textoBusqueda) || 
-                                   cliente.cedula.includes(textoBusqueda);
-                
+                const matchTexto = cliente.nombre.toLowerCase().includes(textoBusqueda) || cliente.email.toLowerCase().includes(textoBusqueda) || cliente.cedula.includes(textoBusqueda);
                 if (!matchTexto) return false;
-
-                // Filtro de estado
                 const activo = cliente.expiraMs > ahora;
                 const diasRestantes = (cliente.expiraMs - ahora) / (1000 * 60 * 60 * 24);
-
                 if (filtroActual === 'activos') return activo && diasRestantes > 5;
                 if (filtroActual === 'proximos') return activo && diasRestantes <= 5;
                 if (filtroActual === 'vencidos') return !activo;
-                return true; // 'todos'
+                return true;
             });
 
-            if (clientesFiltrados.length === 0) {
-                clientsContainer.innerHTML = '<div class="empty-state">No se encontraron clientes con este filtro.</div>';
-                return;
-            }
+            if (clientesFiltrados.length === 0) { clientsContainer.innerHTML = '<div class="empty-state">No se encontraron clientes.</div>'; return; }
 
             clientesFiltrados.forEach(cliente => {
                 const activo = cliente.expiraMs > Date.now();
                 const diasRestantes = (cliente.expiraMs - Date.now()) / (1000 * 60 * 60 * 24);
+                let claseCard = 'status-expired'; let claseBadge = 'badge-expired'; let textoEstado = '⛔ Vencido';
                 
-                let claseCard = 'status-expired';
-                let claseBadge = 'badge-expired';
-                let textoEstado = '⛔ Vencido o Bloqueado';
-
                 if (activo) {
-                    if (diasRestantes <= 5) {
-                        claseCard = 'status-warning'; claseBadge = 'badge-warning';
-                        textoEstado = `⚠️ Vence en ${Math.ceil(diasRestantes)} días`;
-                    } else {
-                        claseCard = 'status-active'; claseBadge = 'badge-active';
-                        const fechaStr = new Date(cliente.expiraMs).toLocaleDateString('es-VE');
-                        textoEstado = `✅ Activo hasta: ${fechaStr}`;
-                    }
+                    if (diasRestantes <= 5) { claseCard = 'status-warning'; claseBadge = 'badge-warning'; textoEstado = `⚠️ Vence en ${Math.ceil(diasRestantes)} días`; }
+                    else { claseCard = 'status-active'; claseBadge = 'badge-active'; textoEstado = `✅ Activo hasta: ${new Date(cliente.expiraMs).toLocaleDateString('es-VE')}`; }
                 }
 
                 const card = document.createElement('div');
                 card.className = `client-card ${claseCard}`;
                 card.innerHTML = `
                     <div class="client-name">${cliente.nombre}</div>
-                    <div class="client-info">
-                        📧 ${cliente.email} <br>
-                        🪪 ${cliente.cedula} | 📲 ${cliente.telefono}
-                    </div>
+                    <div class="client-info">📧 ${cliente.email} <br>🪪 ${cliente.cedula} | 📲 ${cliente.telefono}</div>
                     <div class="status-badge ${claseBadge}">${textoEstado}</div>
                     <div class="card-actions">
                         <button class="btn-card btn-edit" onclick="abrirModalFecha('${cliente.uid}', '${cliente.nombre}', ${cliente.expiraMs})">📅 Editar Fecha</button>
                         <button class="btn-card btn-block" onclick="bloquearCliente('${cliente.uid}', '${cliente.nombre}')">⛔ Bloquear</button>
-                    </div>
-                `;
+                    </div>`;
                 clientsContainer.appendChild(card);
             });
         };
 
-        // --- LÓGICA PARA EDITAR FECHA ---
         window.abrirModalFecha = function(uid, nombre, expiraMs) {
             clienteEditandoUID = uid;
             document.getElementById('modal-cliente-nombre').innerText = nombre;
-            
-            let fechaInicial = new Date();
-            if (expiraMs > 0) fechaInicial = new Date(expiraMs);
-            
-            // Formatear para el input datetime-local (YYYY-MM-DDThh:mm)
+            let fechaInicial = expiraMs > 0 ? new Date(expiraMs) : new Date();
             fechaInicial.setMinutes(fechaInicial.getMinutes() - fechaInicial.getTimezoneOffset());
             document.getElementById('input-fecha-expiracion').value = fechaInicial.toISOString().slice(0,16);
-            
             document.getElementById('modal-fecha').style.display = 'flex';
         };
-
-        window.cerrarModalFecha = function() {
-            document.getElementById('modal-fecha').style.display = 'none';
-            clienteEditandoUID = null;
-        };
+        window.cerrarModalFecha = function() { document.getElementById('modal-fecha').style.display = 'none'; clienteEditandoUID = null; };
 
         window.guardarNuevaFecha = async function() {
             if (!clienteEditandoUID) return;
-            const nuevaFechaStr = document.getElementById('input-fecha-expiracion').value;
-            if (!nuevaFechaStr) return alert("Selecciona una fecha válida.");
-
-            const nuevaFechaMs = new Date(nuevaFechaStr).getTime();
-            
+            const nuevaFechaMs = new Date(document.getElementById('input-fecha-expiracion').value).getTime();
             try {
-                const docRef = doc(db, "usuarios", clienteEditandoUID);
-                await updateDoc(docRef, { jennyfit_membership_expiry: String(nuevaFechaMs) });
-                alert("✅ Fecha actualizada correctamente.");
-                cerrarModalFecha();
-                cargarClientes();
-            } catch (error) {
-                console.error(error); alert("Error al guardar: " + error.message);
-            }
+                await updateDoc(doc(db, "usuarios", clienteEditandoUID), { jennyfit_membership_expiry: String(nuevaFechaMs) });
+                alert("✅ Fecha actualizada."); cerrarModalFecha(); cargarClientes();
+            } catch (error) { alert("Error: " + error.message); }
         };
 
-        // --- LÓGICA PARA BLOQUEAR ---
         window.bloquearCliente = async function(uid, nombre) {
-            if (!confirm(`¿Estás seguro de que quieres bloquear a ${nombre}?\nSe le quitará el acceso inmediatamente.`)) return;
-            
+            if (!confirm(`¿Bloquear a ${nombre}?`)) return;
             try {
-                // Al poner la fecha en 0, el sistema lo considera vencido
-                const docRef = doc(db, "usuarios", uid);
-                await updateDoc(docRef, { jennyfit_membership_expiry: "0" });
-                alert(`⛔ ${nombre} ha sido bloqueado.`);
-                cargarClientes();
-            } catch (error) {
-                console.error(error); alert("Error al bloquear: " + error.message);
-            }
+                await updateDoc(doc(db, "usuarios", uid), { jennyfit_membership_expiry: "0" });
+                alert(`⛔ ${nombre} bloqueado.`); cargarClientes();
+            } catch (error) { alert("Error: " + error.message); }
         };
+
+        // --- MÓDULO NOTIFICACIONES ---
+        window.enviarNotificacion = async function() {
+            const title = document.getElementById('notif-title').value.trim();
+            const body = document.getElementById('notif-body').value.trim();
+            const image = document.getElementById('notif-image').value.trim();
+            const status = document.getElementById('notif-status');
+            
+            if (!title || !body) { alert("Escribe título y mensaje."); return; }
+            
+            status.style.display = 'block';
+            try {
+                const res = await fetch('/api/enviar-notificacion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, body, image, topic: 'noticias_jennyfit', secret: 'JENNYFIT_ADMIN_2026' })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert("✅ ¡Notificación enviada!");
+                    document.getElementById('notif-title').value = '';
+                    document.getElementById('notif-body').value = '';
+                    document.getElementById('notif-image').value = '';
+                } else { alert("❌ Error: " + data.error); }
+            } catch (e) { alert("❌ Error de red al enviar."); }
+            finally { status.style.display = 'none'; }
+        };
+
+        // --- MÓDULO CARRUSEL ---
+        window.cargarCarruselAdmin = async function() {
+            const lista = document.getElementById('carrusel-lista');
+            lista.innerHTML = 'Cargando...';
+            try {
+                const docSnap = await getDoc(doc(db, "configuracion", "carrusel"));
+                if (docSnap.exists() && docSnap.data().items) {
+                    carruselItems = docSnap.data().items;
+                } else {
+                    carruselItems = [];
+                }
+                renderizarCarruselAdmin();
+            } catch (e) { lista.innerHTML = 'Error al cargar.'; }
+        };
+
+        window.renderizarCarruselAdmin = function() {
+            const lista = document.getElementById('carrusel-lista');
+            if (carruselItems.length === 0) { lista.innerHTML = '<div class="empty-state">No hay imágenes en el carrusel.</div>'; return; }
+            
+            lista.innerHTML = '';
+            carruselItems.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'slide-item';
+                div.innerHTML = `
+                    <img src="${item.url}" alt="Slide">
+                    <div class="slide-item-info">
+                        <b>${item.texto || 'Sin texto'}</b>
+                        ${item.segundos} segundos
+                    </div>
+                    <button class="btn-delete" onclick="eliminarDelCarrusel(${index})">🗑️</button>
+                `;
+                lista.appendChild(div);
+            });
+        };
+
+        window.agregarAlCarrusel = async function() {
+            const url = document.getElementById('carrusel-url').value.trim();
+            const texto = document.getElementById('carrusel-texto').value.trim();
+            const segundos = parseInt(document.getElementById('carrusel-segundos').value) || 5;
+
+            if (!url) { alert("La URL de la imagen es obligatoria."); return; }
+
+            carruselItems.push({ url, texto, segundos });
+            await guardarCarruselEnFirebase();
+            
+            document.getElementById('carrusel-url').value = '';
+            document.getElementById('carrusel-texto').value = '';
+            alert("✅ Imagen añadida al carrusel.");
+        };
+
+        window.eliminarDelCarrusel = async function(index) {
+            if (!confirm("¿Eliminar esta imagen del carrusel?")) return;
+            carruselItems.splice(index, 1);
+            await guardarCarruselEnFirebase();
+        };
+
+        async function guardarCarruselEnFirebase() {
+            try {
+                await setDoc(doc(db, "configuracion", "carrusel"), { items: carruselItems });
+                renderizarCarruselAdmin();
+            } catch (e) { alert("Error al guardar en Firebase."); }
+        }
 
         // Observador de sesión
         onAuthStateChanged(auth, (user) => {
             if (user && user.email === CORREO_ADMIN) {
-                loginScreen.style.display = 'none';
-                dashboard.style.display = 'block';
+                loginScreen.style.display = 'none'; dashboard.style.display = 'block';
                 document.getElementById('admin-email-display').innerText = user.email;
                 cargarClientes();
             } else {
-                loginScreen.style.display = 'flex';
-                dashboard.style.display = 'none';
-                loginLoading.style.display = 'none';
-                btnGoogle.style.display = 'flex';
+                loginScreen.style.display = 'flex'; dashboard.style.display = 'none';
+                loginLoading.style.display = 'none'; btnGoogle.style.display = 'flex';
             }
         });
     </script>
