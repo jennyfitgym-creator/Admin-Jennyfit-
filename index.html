@@ -195,9 +195,7 @@
             <button class="btn-save-date" onclick="guardarNuevaFecha()">💾 Guardar Fecha</button>
             <button class="btn-cancel" onclick="cerrarModalFecha()">Cancelar</button>
         </div>
-    </div>
-
-    <!-- SCRIPTS DE FIREBASE -->
+    </div>    <!-- SCRIPTS DE FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
@@ -369,20 +367,30 @@
             
             status.style.display = 'block';
             try {
-                // 🚨 AQUÍ ESTÁ LA CORRECCIÓN: Apuntando a la URL principal de la app
                 const res = await fetch('https://jennyv2.vercel.app/api/enviar-notificacion', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ title, body, image, topic: 'noticias_jennyfit', secret: 'JENNYFIT_ADMIN_2026' })
                 });
+                
+                if (!res.ok) {
+                    const textoError = await res.text();
+                    throw new Error(`Error ${res.status}: ${textoError}`);
+                }
+
                 const data = await res.json();
                 if (data.success) {
                     alert("✅ ¡Notificación enviada!");
                     document.getElementById('notif-title').value = '';
                     document.getElementById('notif-body').value = '';
                     document.getElementById('notif-image').value = '';
-                } else { alert("❌ Error: " + data.error); }
-            } catch (e) { alert("❌ Error de red al enviar."); }
+                } else { 
+                    alert("❌ Error del servidor: " + data.error); 
+                }
+            } catch (e) { 
+                console.error(e);
+                alert("❌ Error: " + e.message); 
+            }
             finally { status.style.display = 'none'; }
         };
 
