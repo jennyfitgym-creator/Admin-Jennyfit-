@@ -277,7 +277,7 @@
             }
         };
 
-        // 🚨 LÓGICA DE NOTIFICACIONES PUSH 🚨
+        // 🚨 LÓGICA DE NOTIFICACIONES PUSH (GUARDAR TOKEN EN FIRESTORE) 🚨
         window.activarNotificacionesAdmin = async function() {
             try {
                 if (!('Notification' in window)) { alert("Este dispositivo no soporta notificaciones."); return; }
@@ -287,10 +287,11 @@
 
                 btnNotifAdmin.innerText = "⏳ Conectando...";
                 
-                // Registrar SW y esperar
+                // 1. Registrar SW y esperar
                 const swReg = await navigator.serviceWorker.register('./sw.js');
                 await navigator.serviceWorker.ready;
                 
+                // 2. Obtener Token
                 const currentToken = await getToken(messaging, { 
                     vapidKey: VAPID_KEY,
                     serviceWorkerRegistration: swReg 
@@ -300,12 +301,8 @@
                     tokenAdminFCM = currentToken;
                     localStorage.setItem('jennyfit_admin_fcm_token', currentToken);
                     
-                    // Suscribir a Vercel
-                    await fetch('https://jennyv2.vercel.app/api/suscribir', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ token: currentToken, topic: 'admin_alertas', action: 'subscribe' })
-                    });
+                    // 3. Guardar el Token en Firestore (Caja Fuerte)
+                    await setDoc(doc(db, "configuracion", "admin_push"), { token: currentToken });
 
                     btnNotifAdmin.innerText = "🔔 Alertas ON";
                     btnNotifAdmin.classList.add('active');
@@ -321,10 +318,18 @@
             }
         };
 
-        // 🚨 FUNCIÓN DE PRUEBA 🚨
+        // 🚨 FUNCIÓN DE PRUEBA (Lee el token de Firestore y lo manda a Vercel)
         window.probarNotificacionAdmin = async function() {
             try {
-                alert("Enviando alerta de prueba al canal 'admin_alertas'...");
+                alert("Buscando tu token en Firebase para enviar la prueba...");
+                // Buscar el token guardado
+                const docSnap = await getDoc(doc(db, "configuracion", "admin_push"));
+                if (!docSnap.exists() || !docSnap.data().token) {
+                    alert("❌ Primero debes tocar el botón '🔔 Activar Alertas' para generar tu token.");
+                    return;
+                }
+                const miToken = docSnap.data().token;
+
                 const res = await fetch('https://jennyv2.vercel.app/api/enviar-notificacion', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -332,7 +337,7 @@
                         title: '🧪 Prueba de Alerta Admin',
                         body: 'Si ves esto, el Push y Vercel funcionan de maravilla.',
                         image: 'https://jennyfitapp.firebasestorage.app/Iconojennyfit.png',
-                        topic: 'admin_alertas',
+                        token: miToken, // 🚨 AHORA ENVIAMOS TOKEN, NO TOPIC
                         secret: 'JENNYFIT_ADMIN_2026'
                     })
                 });
@@ -570,7 +575,7 @@
             } catch (error) { alert("Error: " + error.message); }
         };
 
-        // --- MÓDULO NOTIFICACIONES (ENVIAR A CLIENTES) ---
+        // --- MÓDULO NOTIFICACIONES (ENVIAR A CLIENTES MASIVO) ---
         window.enviarNotificacion = async function() {
             const title = document.getElementById('notif-title').value.trim();
             const body = document.getElementById('notif-body').value.trim();
@@ -584,6 +589,7 @@
                 const res = await fetch('https://jennyv2.vercel.app/api/enviar-notificacion', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    // AQUÍ SEGUIMOS USANDO TOPIC PARA LOS CLIENTES
                     body: JSON.stringify({ title, body, image, topic: 'noticias_jennyfit', secret: 'JENNYFIT_ADMIN_2026' })
                 });
                 
