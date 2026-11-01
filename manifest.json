@@ -2,7 +2,7 @@
   "name": "Jennyfit Admin",
   "short_name": "JF Admin",
   "description": "Panel de administración de Jennyfit",
-  "start_url": "./indexappadminkatrativa.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0b0d0c",
   "theme_color": "#39FF14",
