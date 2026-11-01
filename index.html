@@ -276,7 +276,7 @@
             }
         };
 
-        // 🚨 LÓGICA DE NOTIFICACIONES PUSH 🚨
+        // 🚨 LÓGICA DE NOTIFICACIONES PUSH (CORREGIDA) 🚨
         window.activarNotificacionesAdmin = async function() {
             try {
                 if (!('Notification' in window)) { alert("Este dispositivo no soporta notificaciones."); return; }
@@ -286,9 +286,11 @@
 
                 btnNotifAdmin.innerText = "⏳ Conectando...";
                 
-                // Registrar SW si no está listo
+                // 1. Registrar el Service Worker y ESPERAR a que esté listo
                 const swReg = await navigator.serviceWorker.register('./sw.js');
+                await navigator.serviceWorker.ready; // <- CLAVE: Espera a que el SW esté activo
                 
+                // 2. Ahora sí, pedir el token pasando el registro del SW
                 const currentToken = await getToken(messaging, { 
                     vapidKey: VAPID_KEY,
                     serviceWorkerRegistration: swReg 
@@ -328,7 +330,6 @@
         // Escuchar notificaciones mientras la app está abierta
         onMessage(messaging, (payload) => {
             console.log('Notificación en primer plano: ', payload);
-            // Aquí podrías disparar el sonido de alerta si lo deseas
         });
 
         // --- LOGIN Y SESIÓN ---
