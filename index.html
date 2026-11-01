@@ -52,7 +52,8 @@
         
         .header-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
         .btn-icon { background: var(--card); border: 1px solid var(--border); color: var(--text); width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; }
-        .btn-text { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 12px; font-weight: 800; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .btn-text { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 12px; font-weight: 800; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.3s; }
+        
         #btn-notif-admin.active { background: var(--gold); color: #000; border-color: var(--gold); }
         .btn-logout { background: rgba(255,42,42,0.1); border: 1px solid var(--danger); color: var(--danger); padding: 8px 12px; border-radius: 12px; font-weight: 800; font-size: 0.75rem; cursor: pointer; }
 
@@ -73,7 +74,7 @@
         .filter-tab { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 8px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
         .filter-tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
 
-        /* TARJETAS CLIENTES (DISEÑO MODERNO) */
+        /* TARJETAS CLIENTES */
         .client-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
         .client-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--border); }
         .client-card.status-active::before { background: var(--primary); }
@@ -150,7 +151,8 @@
             </div>
             <div class="header-actions">
                 <button class="btn-icon" onclick="cambiarTema()" id="btn-theme" title="Cambiar Tema">🌙</button>
-                <button class="btn-text" id="btn-notif-admin" onclick="activarNotificacionesAdmin()">🔔 Alertas</button>
+                <!-- BOTÓN TOGGLE DE ALERTAS -->
+                <button class="btn-text" id="btn-notif-admin" onclick="toggleAlertasAdmin()">🔔 Activar Alertas</button>
                 <button class="btn-text" onclick="probarNotificacionAdmin()" style="color:var(--primary);">🧪 Probar</button>
                 <button class="btn-logout" onclick="cerrarSesionAdmin()">Salir</button>
             </div>
@@ -305,7 +307,6 @@
         function aplicarTema() {
             const temaGuardado = localStorage.getItem('jennyfit_admin_theme') || 'dark';
             const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
-            
             let usarClaro = false;
             if (temaGuardado === 'light') usarClaro = true;
             else if (temaGuardado === 'system') usarClaro = mediaQuery.matches;
@@ -322,11 +323,10 @@
             let siguiente = 'dark';
             if (actual === 'dark') siguiente = 'light';
             else if (actual === 'light') siguiente = 'system';
-            
             localStorage.setItem('jennyfit_admin_theme', siguiente);
             aplicarTema();
         };
-        aplicarTema(); // Ejecutar al cargar
+        aplicarTema();
 
         // 🚨 LOGOTIPO PERSONALIZADO 🚨
         function cargarLogoGuardado() {
@@ -352,39 +352,63 @@
             reader.readAsDataURL(file);
         };
 
-        // 🚨 LÓGICA DE NOTIFICACIONES 🚨
-        window.activarNotificacionesAdmin = async function() {
-            try {
-                if (!('Notification' in window)) { alert("Este dispositivo no soporta notificaciones."); return; }
-                const permiso = await Notification.requestPermission();
-                if (permiso !== 'granted') { alert("Debes permitir las notificaciones."); return; }
+        // 🚨 LÓGICA DE NOTIFICACIONES (TOGGLE ON/OFF) 🚨
+        window.toggleAlertasAdmin = async function() {
+            const estaActivo = localStorage.getItem('jennyfit_admin_fcm_token') && localStorage.getItem('jennyfit_admin_fcm_token').length > 10;
 
-                btnNotifAdmin.innerText = "⏳...";
-                const swReg = await navigator.serviceWorker.register('./sw.js');
-                await navigator.serviceWorker.ready;
-                const currentToken = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });
+            if (estaActivo) {
+                // DESACTIVAR
+                if (!confirm("¿Quieres desactivar las alertas de notificación en este dispositivo?")) return;
+                try {
+                    // Borrar token de la base de datos
+                    await setDoc(doc(db, "configuracion", "admin_push"), { token: "" });
+                    localStorage.removeItem('jennyfit_admin_fcm_token');
+                    tokenAdminFCM = null;
+                    
+                    btnNotifAdmin.innerText = "🔔 Activar Alertas";
+                    btnNotifAdmin.classList.remove('active');
+                    alert("✅ Alertas desactivadas en este dispositivo.");
+                } catch (e) { alert("Error al desactivar: " + e.message); }
+            } else {
+                // ACTIVAR
+                try {
+                    if (!('Notification' in window)) { alert("Este dispositivo no soporta notificaciones."); return; }
+                    const permiso = await Notification.requestPermission();
+                    if (permiso !== 'granted') { alert("Debes permitir las notificaciones."); return; }
 
-                if (currentToken) {
-                    tokenAdminFCM = currentToken;
-                    localStorage.setItem('jennyfit_admin_fcm_token', currentToken);
-                    await setDoc(doc(db, "configuracion", "admin_push"), { token: currentToken });
-                    btnNotifAdmin.innerText = "🔔 Alertas ON";
-                    btnNotifAdmin.classList.add('active');
-                    alert("✅ ¡Notificaciones activadas!");
-                } else {
-                    btnNotifAdmin.innerText = "🔔 Alertas";
+                    btnNotifAdmin.innerText = "⏳...";
+                    const swReg = await navigator.serviceWorker.register('./sw.js');
+                    await navigator.serviceWorker.ready;
+                    
+                    const currentToken = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });
+
+                    if (currentToken) {
+                        tokenAdminFCM = currentToken;
+                        localStorage.setItem('jennyfit_admin_fcm_token', currentToken);
+                        await setDoc(doc(db, "configuracion", "admin_push"), { token: currentToken });
+                        
+                        btnNotifAdmin.innerText = "🔔 Alertas ON";
+                        btnNotifAdmin.classList.add('active');
+                        alert("✅ ¡Notificaciones activadas!");
+                    } else {
+                        btnNotifAdmin.innerText = "🔔 Activar Alertas";
+                    }
+                } catch (error) {
+                    alert("Error: " + error.message);
+                    btnNotifAdmin.innerText = "🔔 Activar Alertas";
                 }
-            } catch (error) {
-                alert("Error: " + error.message);
-                btnNotifAdmin.innerText = "🔔 Alertas";
             }
         };
 
+        // Cargar estado del botón al inicio
+        if (tokenAdminFCM) {
+            btnNotifAdmin.innerText = "🔔 Alertas ON";
+            btnNotifAdmin.classList.add('active');
+        }
+
         window.probarNotificacionAdmin = async function() {
             try {
-                const docSnap = await getDoc(doc(db, "configuracion", "admin_push"));
-                if (!docSnap.exists() || !docSnap.data().token) { alert("❌ Primero activa las alertas."); return; }
-                const miToken = docSnap.data().token;
+                if (!tokenAdminFCM) { alert("❌ Primero debes encender las alertas."); return; }
                 
                 const res = await fetch('https://jennyv2.vercel.app/api/enviar-notificacion', {
                     method: 'POST',
@@ -393,7 +417,7 @@
                         title: '🧪 Prueba de Alerta Admin',
                         body: 'Si ves esto, el Push y Vercel funcionan.',
                         image: 'https://admin-jennyfit.vercel.app/icono-admin-192.png',
-                        token: miToken,
+                        token: tokenAdminFCM,
                         secret: 'JENNYFIT_ADMIN_2026'
                     })
                 });
@@ -402,10 +426,6 @@
                 else alert("❌ Error: " + data.error);
             } catch(e) { alert("❌ Error de red: " + e.message); }
         };
-
-        if (tokenAdminFCM && Notification.permission === 'granted') {
-            btnNotifAdmin.innerText = "🔔 Alertas ON"; btnNotifAdmin.classList.add('active');
-        }
 
         onMessage(messaging, (payload) => {
             const title = payload.notification ? payload.notification.title : 'Alerta Admin';
@@ -438,10 +458,7 @@
         window.cambiarTabAdmin = function(tab, event) {
             document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-            
-            // Encontrar el botón clickeado
             if(event && event.currentTarget) event.currentTarget.classList.add('active');
-            
             document.getElementById('tab-' + tab).classList.add('active');
             if (tab === 'carrusel') cargarCarruselAdmin();
         };
@@ -623,7 +640,6 @@
             abrirModalConfirm("Eliminar Cliente", `⚠️ ¿Eliminar definitivamente a ${nombre}? Si vuelve a entrar, tendrá que registrarse de nuevo.`, async () => {
                 try {
                     await deleteDoc(doc(db, "usuarios", uid));
-                    // Lo quitamos de la memoria para que no salte alerta falsa
                     clientesConocidosUIDs.delete(uid);
                     localStorage.setItem('jennyfit_admin_known_uids', JSON.stringify(Array.from(clientesConocidosUIDs)));
                 } catch (error) { alert("Error al eliminar: " + error.message); }
