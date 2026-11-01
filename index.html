@@ -42,22 +42,15 @@
         #dashboard { display: none; width: 100%; max-width: 800px; margin: 0 auto; padding: 20px; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* HEADER */
-        .header-admin { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+        /* HEADER (MÁS LIMPIO) */
+        .header-admin { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
         .header-left { display: flex; flex-direction: column; gap: 4px; }
         .logo-img-container { display: flex; align-items: center; cursor: pointer; gap: 8px; }
-        #admin-logo-img { max-height: 40px; max-width: 180px; object-fit: contain; display: none; }
-        .logo-text-small { color: var(--primary); font-weight: 900; font-size: 1.4rem; letter-spacing: -0.5px; }
+        #admin-logo-img { max-height: 45px; max-width: 180px; object-fit: contain; display: none; }
+        .logo-text-small { color: var(--primary); font-weight: 900; font-size: 1.5rem; letter-spacing: -0.5px; }
         .admin-email { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
-        
-        .header-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-        .btn-icon { background: var(--card); border: 1px solid var(--border); color: var(--text); width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; }
-        .btn-text { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 12px; font-weight: 800; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.3s; }
-        
-        #btn-notif-admin.active { background: var(--gold); color: #000; border-color: var(--gold); }
-        .btn-logout { background: rgba(255,42,42,0.1); border: 1px solid var(--danger); color: var(--danger); padding: 8px 12px; border-radius: 12px; font-weight: 800; font-size: 0.75rem; cursor: pointer; }
 
-        /* TABS (AHORA ABAJO) */
+        /* TABS INFERIORES */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); z-index: 100; }
         .nav-item { background: none; border: none; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.7rem; font-weight: 800; cursor: pointer; transition: color 0.2s; }
         .nav-item span.icon { font-size: 1.3rem; }
@@ -106,6 +99,17 @@
         .form-group input { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; color: var(--text); box-sizing: border-box; font-family: inherit; outline: none; }
         .btn-primary { width: 100%; padding: 14px; background: var(--primary); color: #051405; border: none; border-radius: 12px; font-weight: 900; cursor: pointer; font-size: 0.9rem; }
 
+        /* PESTAÑA AJUSTES */
+        .settings-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 20px; }
+        .settings-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+        .settings-item:last-child { border-bottom: none; }
+        .settings-item:active { background: var(--card-sub); }
+        .settings-item-left { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 0.95rem; }
+        .settings-icon { font-size: 1.2rem; }
+        .settings-value { font-size: 0.85rem; font-weight: 800; color: var(--muted); }
+        .settings-value.active { color: var(--gold); }
+        .settings-value.danger { color: var(--danger); }
+
         #modal-fecha, #modal-confirm { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 10000; justify-content: center; align-items: center; }
         .modal-box { background: var(--card); padding: 25px; border-radius: 24px; border: 1px solid var(--border); width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .modal-box h3 { margin-top: 0; color: var(--text); font-size: 1.2rem; margin-bottom: 15px; }
@@ -139,7 +143,7 @@
 
     <!-- PANTALLA DEL DASHBOARD -->
     <div id="dashboard">
-        <!-- HEADER -->
+        <!-- HEADER LIMPIO -->
         <div class="header-admin">
             <div class="header-left">
                 <div class="logo-img-container" onclick="document.getElementById('logo-upload').click()">
@@ -149,21 +153,12 @@
                 </div>
                 <div class="admin-email" id="admin-email-display"></div>
             </div>
-            <div class="header-actions">
-                <button class="btn-icon" onclick="cambiarTema()" id="btn-theme" title="Cambiar Tema">🌙</button>
-                <!-- BOTÓN TOGGLE DE ALERTAS -->
-                <button class="btn-text" id="btn-notif-admin" onclick="toggleAlertasAdmin()">🔔 Activar Alertas</button>
-                <button class="btn-text" onclick="probarNotificacionAdmin()" style="color:var(--primary);">🧪 Probar</button>
-                <button class="btn-logout" onclick="cerrarSesionAdmin()">Salir</button>
-            </div>
+            <button class="btn-card btn-edit" style="width:auto; padding:8px 12px;" onclick="recargarManual()">🔄 Actualizar</button>
         </div>
 
         <!-- PESTAÑA: CLIENTES -->
         <div id="tab-clientes" class="tab-panel active">
-            <div class="section-title">
-                Clientes
-                <button class="btn-text" onclick="recargarManual()">🔄</button>
-            </div>
+            <div class="section-title">Directorio de Clientes</div>
             
             <input type="text" id="search-client" class="search-input" placeholder="🔍 Buscar nombre, cédula..." oninput="filtrarYRenderizar()">
             
@@ -221,6 +216,49 @@
             <div class="section-title" style="margin-top: 20px; font-size: 1rem;">Publicidad Actual</div>
             <div id="carrusel-lista"></div>
         </div>
+
+        <!-- 🚨 NUEVA PESTAÑA: AJUSTES 🚨 -->
+        <div id="tab-ajustes" class="tab-panel">
+            <div class="section-title">Ajustes</div>
+            
+            <div class="settings-card">
+                <!-- Tema -->
+                <div class="settings-item" onclick="cambiarTema()">
+                    <div class="settings-item-left">
+                        <span class="settings-icon">🎨</span>
+                        <span>Tema de la App</span>
+                    </div>
+                    <span id="btn-theme" class="settings-value">🌙 Oscuro</span>
+                </div>
+                
+                <!-- Alertas -->
+                <div class="settings-item" onclick="toggleAlertasAdmin()">
+                    <div class="settings-item-left">
+                        <span class="settings-icon">🔔</span>
+                        <span>Notificaciones Push</span>
+                    </div>
+                    <span id="btn-notif-admin" class="settings-value">Desactivadas</span>
+                </div>
+
+                <!-- Probar Notificación -->
+                <div class="settings-item" onclick="probarNotificacionAdmin()">
+                    <div class="settings-item-left">
+                        <span class="settings-icon">🧪</span>
+                        <span>Probar Notificación</span>
+                    </div>
+                    <span class="settings-value" style="color:var(--primary);">Enviar ➔</span>
+                </div>
+
+                <!-- Cerrar Sesión -->
+                <div class="settings-item" onclick="cerrarSesionAdmin()">
+                    <div class="settings-item-left" style="color:var(--danger);">
+                        <span class="settings-icon">🚪</span>
+                        <span>Cerrar Sesión</span>
+                    </div>
+                    <span class="settings-value danger">Salir ➔</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- BARRA DE NAVEGACIÓN INFERIOR -->
@@ -231,11 +269,15 @@
         </button>
         <button class="nav-item" onclick="cambiarTabAdmin('notificaciones', event)">
             <span class="icon">📢</span>
-            <span>Notificaciones</span>
+            <span>Notificar</span>
         </button>
         <button class="nav-item" onclick="cambiarTabAdmin('carrusel', event)">
             <span class="icon">🖼️</span>
             <span>Carrusel</span>
+        </button>
+        <button class="nav-item" onclick="cambiarTabAdmin('ajustes', event)">
+            <span class="icon">⚙️</span>
+            <span>Ajustes</span>
         </button>
     </div>
 
@@ -301,7 +343,10 @@
         const loginLoading = document.getElementById('login-loading');
         const clientsContainer = document.getElementById('clients-container');
         const loadingClients = document.getElementById('loading-clients');
+        
+        // Elementos de la pestaña Ajustes
         const btnNotifAdmin = document.getElementById('btn-notif-admin');
+        const btnTheme = document.getElementById('btn-theme');
 
         // 🚨 TEMA CLARO / OSCURO 🚨
         function aplicarTema() {
@@ -314,8 +359,10 @@
             if (usarClaro) document.body.classList.add('light-theme');
             else document.body.classList.remove('light-theme');
 
-            const icon = temaGuardado === 'light' ? '☀️' : (temaGuardado === 'system' ? '📱' : '🌙');
-            document.getElementById('btn-theme').innerText = icon;
+            // Cambiar el texto en la pestaña de ajustes
+            if (temaGuardado === 'light') btnTheme.innerText = '☀️ Claro';
+            else if (temaGuardado === 'system') btnTheme.innerText = '📱 Auto';
+            else btnTheme.innerText = '🌙 Oscuro';
         }
 
         window.cambiarTema = function() {
@@ -357,26 +404,23 @@
             const estaActivo = localStorage.getItem('jennyfit_admin_fcm_token') && localStorage.getItem('jennyfit_admin_fcm_token').length > 10;
 
             if (estaActivo) {
-                // DESACTIVAR
                 if (!confirm("¿Quieres desactivar las alertas de notificación en este dispositivo?")) return;
                 try {
-                    // Borrar token de la base de datos
                     await setDoc(doc(db, "configuracion", "admin_push"), { token: "" });
                     localStorage.removeItem('jennyfit_admin_fcm_token');
                     tokenAdminFCM = null;
                     
-                    btnNotifAdmin.innerText = "🔔 Activar Alertas";
+                    btnNotifAdmin.innerText = "Desactivadas";
                     btnNotifAdmin.classList.remove('active');
-                    alert("✅ Alertas desactivadas en este dispositivo.");
+                    alert("✅ Alertas desactivadas.");
                 } catch (e) { alert("Error al desactivar: " + e.message); }
             } else {
-                // ACTIVAR
                 try {
                     if (!('Notification' in window)) { alert("Este dispositivo no soporta notificaciones."); return; }
                     const permiso = await Notification.requestPermission();
                     if (permiso !== 'granted') { alert("Debes permitir las notificaciones."); return; }
 
-                    btnNotifAdmin.innerText = "⏳...";
+                    btnNotifAdmin.innerText = "Conectando...";
                     const swReg = await navigator.serviceWorker.register('./sw.js');
                     await navigator.serviceWorker.ready;
                     
@@ -387,28 +431,28 @@
                         localStorage.setItem('jennyfit_admin_fcm_token', currentToken);
                         await setDoc(doc(db, "configuracion", "admin_push"), { token: currentToken });
                         
-                        btnNotifAdmin.innerText = "🔔 Alertas ON";
+                        btnNotifAdmin.innerText = "Activadas";
                         btnNotifAdmin.classList.add('active');
                         alert("✅ ¡Notificaciones activadas!");
                     } else {
-                        btnNotifAdmin.innerText = "🔔 Activar Alertas";
+                        btnNotifAdmin.innerText = "Desactivadas";
                     }
                 } catch (error) {
                     alert("Error: " + error.message);
-                    btnNotifAdmin.innerText = "🔔 Activar Alertas";
+                    btnNotifAdmin.innerText = "Desactivadas";
                 }
             }
         };
 
         // Cargar estado del botón al inicio
         if (tokenAdminFCM) {
-            btnNotifAdmin.innerText = "🔔 Alertas ON";
+            btnNotifAdmin.innerText = "Activadas";
             btnNotifAdmin.classList.add('active');
         }
 
         window.probarNotificacionAdmin = async function() {
             try {
-                if (!tokenAdminFCM) { alert("❌ Primero debes encender las alertas."); return; }
+                if (!tokenAdminFCM) { alert("❌ Primero debes encender las alertas en Ajustes."); return; }
                 
                 const res = await fetch('https://jennyv2.vercel.app/api/enviar-notificacion', {
                     method: 'POST',
@@ -452,6 +496,7 @@
         };
 
         window.cerrarSesionAdmin = async function() { 
+            if (!confirm("¿Seguro que quieres cerrar sesión?")) return;
             if (unsubscribeClientes) unsubscribeClientes(); await signOut(auth); 
         };
 
