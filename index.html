@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Admin - Jennyfit</title>
     
-    <!-- 🚨 ETIQUETAS PARA QUE SEA UNA APP INSTALABLE (PWA) 🚨 -->
+    <!-- Etiquetas PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0b0d0c">
     <link rel="apple-touch-icon" href="Iconojennyfit.png">
@@ -121,7 +121,7 @@
                 <div id="admin-email-display" style="font-size: 0.8rem; color: var(--muted);"></div>
             </div>
             <div class="header-actions">
-                <!-- 🚨 BOTÓN DE INSTALACIÓN PWA 🚨 -->
+                <!-- Botón de Instalación PWA -->
                 <button id="btn-install-pwa" onclick="instalarAppAdmin()">📲 Instalar App</button>
                 <button class="btn-logout" onclick="cerrarSesionAdmin()">Salir</button>
             </div>
@@ -278,9 +278,11 @@
             alert("¡App Admin instalada con éxito!");
         });
 
-        // Registrar el Service Worker
+        // 🚨 REGISTRO DEL SERVICE WORKER (CRUCIAL) 🚨
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registro fallido:', err));
+            navigator.serviceWorker.register('./sw.js').then(() => {
+                console.log('Service Worker registrado correctamente');
+            }).catch(err => console.log('SW registro fallido:', err));
         }
 
         // FIN LÓGICA PWA
