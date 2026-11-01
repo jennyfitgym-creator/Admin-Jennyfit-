@@ -1,4 +1,4 @@
-// Service Worker básico para permitir la instalación de la PWA
+// Service Worker para habilitar la instalación de la PWA
 self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
@@ -8,6 +8,5 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-    // Dejamos pasar todas las peticiones normales. 
-    // Esto es solo para que el navegador nos deje instalar la app.
+    // Dejamos pasar las peticiones normales. Esto solo autoriza la instalación de la app.
 });
