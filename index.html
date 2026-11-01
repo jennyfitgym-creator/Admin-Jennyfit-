@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Admin - Jennyfit</title>
+    
+    <!-- 🚨 ETIQUETAS PARA QUE SEA UNA APP INSTALABLE (PWA) 🚨 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0b0d0c">
+    <link rel="apple-touch-icon" href="Iconojennyfit.png">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800;900&display=swap" rel="stylesheet">
@@ -24,9 +30,14 @@
         
         /* DASHBOARD */
         #dashboard { display: none; width: 100%; max-width: 800px; margin: 0 auto; padding: 20px; box-sizing: border-box; }
-        .header-admin { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; }
+        .header-admin { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .header-actions { display: flex; gap: 8px; align-items: center; }
         .btn-logout { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         
+        /* BOTÓN INSTALAR PWA */
+        #btn-install-pwa { display: none; background: var(--primary); color: #051405; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 900; cursor: pointer; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(57, 255, 20, 0); } 100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0); } }
+
         /* TABS */
         .admin-tabs { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
         .admin-tab { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 10px 15px; border-radius: 10px; font-size: 0.85rem; font-weight: 800; cursor: pointer; white-space: nowrap; }
@@ -109,7 +120,11 @@
                 <div style="color: var(--primary); font-weight: 900; font-size: 1.2rem;">JENNYFIT ADMIN</div>
                 <div id="admin-email-display" style="font-size: 0.8rem; color: var(--muted);"></div>
             </div>
-            <button class="btn-logout" onclick="cerrarSesionAdmin()">Salir</button>
+            <div class="header-actions">
+                <!-- 🚨 BOTÓN DE INSTALACIÓN PWA 🚨 -->
+                <button id="btn-install-pwa" onclick="instalarAppAdmin()">📲 Instalar App</button>
+                <button class="btn-logout" onclick="cerrarSesionAdmin()">Salir</button>
+            </div>
         </div>
 
         <!-- NAVEGACIÓN DE PESTAÑAS -->
@@ -234,6 +249,42 @@
         const clientsContainer = document.getElementById('clients-container');
         const loadingClients = document.getElementById('loading-clients');
 
+        // 🚨 LÓGICA PWA (INSTALACIÓN) 🚨
+        let deferredPrompt;
+        const btnInstallPwa = document.getElementById('btn-install-pwa');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            btnInstallPwa.style.display = 'inline-block'; // Mostramos el botón
+        });
+
+        window.instalarAppAdmin = async function() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    btnInstallPwa.style.display = 'none';
+                }
+                deferredPrompt = null;
+            } else {
+                alert("Para instalar en Android: toca los 3 puntos arriba a la derecha y elige 'Instalar aplicación'.\n\nEn iPhone: toca el botón Compartir (↑) y elige 'Agregar a pantalla de inicio'.");
+            }
+        };
+
+        window.addEventListener('appinstalled', () => {
+            btnInstallPwa.style.display = 'none';
+            deferredPrompt = null;
+            alert("¡App Admin instalada con éxito!");
+        });
+
+        // Registrar el Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registro fallido:', err));
+        }
+
+        // FIN LÓGICA PWA
+
         window.iniciarSesionAdmin = async function() {
             try {
                 loginLoading.style.display = 'block'; btnGoogle.style.display = 'none';
@@ -295,7 +346,6 @@
                         if (data.jennyfit_username) {
                             idsActuales.add(doc.id);
 
-                            // 🚨 LEER FECHA CORRECTA DESDE EL SYNC DE LA APP
                             const fechaReg = parseInt((data._syncMeta ? data._syncMeta.ultimaActualizacion : 0) || data.jennyfit_last_ts || 0);
 
                             clientesArrayGlobal.push({
@@ -310,7 +360,7 @@
                         }
                     });
                     
-                    // 🚨 LÓGICA DE ALERTA CORREGIDA
+                    // Lógica de alerta
                     if (primeraCargaCompletada) {
                         snapshot.forEach((doc) => {
                             if (!clientesConocidosUIDs.has(doc.id)) {
@@ -323,12 +373,10 @@
                         });
                     }
 
-                    // Guardar memoria local SIEMPRE
                     clientesConocidosUIDs = idsActuales;
                     localStorage.setItem('jennyfit_admin_known_uids', JSON.stringify(Array.from(clientesConocidosUIDs)));
                     primeraCargaCompletada = true;
 
-                    // Ordenar por fecha (más nuevos primero)
                     clientesArrayGlobal.sort((a, b) => b.fechaRegistro - a.fechaRegistro);
 
                     loadingClients.style.display = 'none';
