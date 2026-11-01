@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Panel de Admin - Jennyfit</title>
     
     <!-- Etiquetas PWA -->
@@ -15,88 +15,110 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0b0d0c; --card: #18181b; --card-sub: #121215; --primary: #39FF14;
-            --text: #f4f4f5; --muted: #a1a1aa; --danger: #ff2a2a; --gold: #f59e0b; --border: rgba(255, 255, 255, 0.1);
+            /* TEMA OSCURO (POR DEFECTO) */
+            --bg: #09090b; --card: #18181b; --card-sub: #27272a; --primary: #39FF14;
+            --text: #f4f4f5; --muted: #a1a1aa; --danger: #ff2a2a; --gold: #f59e0b; 
+            --border: rgba(255, 255, 255, 0.08);
         }
-        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: var(--text); padding-bottom: 50px; }
+
+        body.light-theme {
+            /* TEMA CLARO */
+            --bg: #f4f4f5; --card: #ffffff; --card-sub: #f1f5f9; --primary: #16a34a;
+            --text: #18181b; --muted: #52525b; --danger: #dc2626; --gold: #d97706; 
+            --border: rgba(0, 0, 0, 0.1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: var(--text); padding-bottom: 85px; transition: background 0.3s, color 0.3s; }
         
         /* LOGIN */
-        #login-screen { display: flex; justify-content: center; align-items: center; height: 100vh; padding: 20px; box-sizing: border-box; }
-        .login-box { background: var(--card); border: 1px solid rgba(57, 255, 20, 0.3); border-radius: 20px; padding: 40px 30px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .logo-text { font-size: 2rem; font-weight: 900; color: var(--primary); margin-bottom: 10px; letter-spacing: -1px; }
-        .subtitle { font-size: 0.9rem; color: var(--muted); margin-bottom: 30px; }
-        .btn-google { display: flex; align-items: center; justify-content: center; gap: 10px; background: #ffffff; color: #18181b; border: none; border-radius: 50px; padding: 15px 20px; font-size: 1rem; font-weight: 800; font-family: inherit; cursor: pointer; width: 100%; transition: transform 0.2s; }
-        .btn-google svg { width: 24px; height: 24px; }
+        #login-screen { display: flex; justify-content: center; align-items: center; height: 100vh; padding: 20px; }
+        .login-box { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 40px 30px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        .logo-text { font-size: 2.2rem; font-weight: 900; color: var(--primary); margin-bottom: 10px; letter-spacing: -1px; }
+        .subtitle { font-size: 0.9rem; color: var(--muted); margin-bottom: 30px; font-weight: 600; }
+        .btn-google { display: flex; align-items: center; justify-content: center; gap: 10px; background: #ffffff; color: #18181b; border: none; border-radius: 50px; padding: 15px 20px; font-size: 1rem; font-weight: 800; font-family: inherit; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
         /* DASHBOARD */
-        #dashboard { display: none; width: 100%; max-width: 800px; margin: 0 auto; padding: 20px; box-sizing: border-box; }
-        .header-admin { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-        .header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        .btn-logout { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        
-        /* BOTONES HEADER */
-        #btn-install-pwa { display: none; background: var(--primary); color: #051405; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 900; cursor: pointer; }
-        #btn-notif-admin { background: var(--card-sub); border: 1px solid var(--gold); color: var(--gold); padding: 8px 15px; border-radius: 8px; font-weight: 900; cursor: pointer; transition: all 0.3s; }
-        #btn-notif-admin.active { background: var(--gold); color: #051405; border-color: var(--gold); }
+        #dashboard { display: none; width: 100%; max-width: 800px; margin: 0 auto; padding: 20px; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* TABS */
-        .admin-tabs { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-        .admin-tab { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 10px 15px; border-radius: 10px; font-size: 0.85rem; font-weight: 800; cursor: pointer; white-space: nowrap; }
-        .admin-tab.active { background: var(--primary); color: #051405; border-color: var(--primary); }
+        /* HEADER */
+        .header-admin { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+        .header-left { display: flex; flex-direction: column; gap: 4px; }
+        .logo-img-container { display: flex; align-items: center; cursor: pointer; gap: 8px; }
+        #admin-logo-img { max-height: 40px; max-width: 180px; object-fit: contain; display: none; }
+        .logo-text-small { color: var(--primary); font-weight: 900; font-size: 1.4rem; letter-spacing: -0.5px; }
+        .admin-email { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
         
+        .header-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+        .btn-icon { background: var(--card); border: 1px solid var(--border); color: var(--text); width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; }
+        .btn-text { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 12px; font-weight: 800; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        #btn-notif-admin.active { background: var(--gold); color: #000; border-color: var(--gold); }
+        .btn-logout { background: rgba(255,42,42,0.1); border: 1px solid var(--danger); color: var(--danger); padding: 8px 12px; border-radius: 12px; font-weight: 800; font-size: 0.75rem; cursor: pointer; }
+
+        /* TABS (AHORA ABAJO) */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); z-index: 100; }
+        .nav-item { background: none; border: none; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.7rem; font-weight: 800; cursor: pointer; transition: color 0.2s; }
+        .nav-item span.icon { font-size: 1.3rem; }
+        .nav-item.active { color: var(--primary); }
+
         .tab-panel { display: none; }
         .tab-panel.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* CONTROLES CLIENTES */
-        .section-title { font-size: 1.2rem; font-weight: 900; color: var(--primary); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;}
-        .btn-refresh { background: var(--card-sub); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
-        .search-input { width: 100%; padding: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: inherit; margin-bottom: 12px; box-sizing: border-box; }
-        .filter-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 5px; }
-        .filter-tab { background: var(--bg); border: 1px solid var(--border); color: var(--muted); padding: 8px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
-        .filter-tab.active { background: var(--primary); color: #051405; border-color: var(--primary); }
+        .section-title { font-size: 1.3rem; font-weight: 900; color: var(--text); margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;}
+        .search-input { width: 100%; padding: 14px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; color: var(--text); font-family: inherit; font-weight: 600; margin-bottom: 15px; outline: none; }
+        .filter-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; scrollbar-width: none; }
+        .filter-tabs::-webkit-scrollbar { display: none; }
+        .filter-tab { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 8px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+        .filter-tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
 
-        /* TARJETAS CLIENTES */
-        .client-card { background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 12px; padding: 15px; margin-bottom: 12px; }
-        .client-card.status-active { border-left-color: var(--primary); }
-        .client-card.status-warning { border-left-color: var(--gold); }
-        .client-card.status-expired { border-left-color: var(--danger); }
-        .client-name { font-size: 1rem; font-weight: 900; color: var(--text); margin-bottom: 4px; }
-        .client-info { font-size: 0.8rem; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
-        .client-info b { color: var(--text); }
-        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: bold; margin-bottom: 12px; }
-        .badge-active { background: rgba(57, 255, 20, 0.1); color: var(--primary); border: 1px solid var(--primary); }
-        .badge-warning { background: rgba(245, 158, 11, 0.1); color: var(--gold); border: 1px solid var(--gold); }
-        .badge-expired { background: rgba(255, 42, 42, 0.1); color: var(--danger); border: 1px solid var(--danger); }
-        .card-actions { display: flex; gap: 8px; }
-        .btn-card { flex: 1; padding: 8px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; cursor: pointer; text-align: center; border: none; font-family: inherit;}
-        .btn-edit { background: var(--card-sub); border: 1px solid var(--text); color: var(--text); }
-        .btn-block { background: rgba(255, 42, 42, 0.1); border: 1px solid var(--danger); color: var(--danger); }
-
-        /* FORMULARIOS (NOTIF Y CARRUSEL) */
-        .form-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 5px; font-weight: bold; }
-        .form-group input { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: white; box-sizing: border-box; font-family: inherit; }
-        .btn-primary { width: 100%; padding: 12px; background: var(--primary); color: #051405; border: none; border-radius: 8px; font-weight: 900; cursor: pointer; font-size: 0.9rem; }
+        /* TARJETAS CLIENTES (DISEÑO MODERNO) */
+        .client-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
+        .client-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--border); }
+        .client-card.status-active::before { background: var(--primary); }
+        .client-card.status-warning::before { background: var(--gold); }
+        .client-card.status-expired::before { background: var(--danger); }
         
-        /* MODAL FECHA */
-        #modal-fecha { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center; }
-        .modal-box { background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid var(--primary); width: 90%; max-width: 350px; text-align: center; }
-        .modal-box h3 { margin-top: 0; color: var(--primary); }
-        .modal-box input { width: 100%; padding: 12px; margin: 15px 0; background: var(--bg); border: 1px solid var(--border); color: white; border-radius: 8px; font-family: inherit; box-sizing: border-box;}
-        .btn-save-date { width: 100%; padding: 12px; background: var(--primary); color: #051405; border: none; border-radius: 8px; font-weight: 900; cursor: pointer; margin-bottom: 8px; }
-        .btn-cancel { width: 100%; padding: 12px; background: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-weight: 900; cursor: pointer; }
+        .client-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .client-name { font-size: 1.1rem; font-weight: 900; color: var(--text); }
+        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+        .badge-active { background: rgba(57, 255, 20, 0.15); color: var(--primary); }
+        .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--gold); }
+        .badge-expired { background: rgba(255, 42, 42, 0.15); color: var(--danger); }
+        
+        .client-info { font-size: 0.8rem; color: var(--muted); line-height: 1.6; margin-bottom: 15px; display: flex; flex-direction: column; gap: 4px; }
+        .client-info span { display: flex; align-items: center; gap: 6px; }
+        
+        .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .btn-card { padding: 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; cursor: pointer; text-align: center; border: none; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.2s; }
+        .btn-card:active { transform: scale(0.96); }
+        .btn-edit { background: var(--card-sub); color: var(--text); }
+        .btn-history { background: rgba(6, 182, 212, 0.1); color: #06b6d4; }
+        .btn-delete-user { background: rgba(255, 42, 42, 0.1); color: var(--danger); }
+        .btn-block { background: rgba(255, 42, 42, 0.05); border: 1px solid var(--danger); color: var(--danger); }
+        
+        /* FORMULARIOS Y MODALES */
+        .form-box { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; font-weight: 700; }
+        .form-group input { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; color: var(--text); box-sizing: border-box; font-family: inherit; outline: none; }
+        .btn-primary { width: 100%; padding: 14px; background: var(--primary); color: #051405; border: none; border-radius: 12px; font-weight: 900; cursor: pointer; font-size: 0.9rem; }
 
-        /* LISTAS DE CARRUSEL */
-        .slide-item { background: var(--card-sub); border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
-        .slide-item img { width: 60px; height: 40px; object-fit: cover; border-radius: 4px; }
-        .slide-item-info { flex: 1; font-size: 0.75rem; }
-        .slide-item-info b { display: block; font-size: 0.8rem; color: var(--text); margin-bottom: 2px; }
-        .btn-delete { background: rgba(255, 42, 42, 0.1); border: 1px solid var(--danger); color: var(--danger); padding: 5px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        #modal-fecha, #modal-confirm { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 10000; justify-content: center; align-items: center; }
+        .modal-box { background: var(--card); padding: 25px; border-radius: 24px; border: 1px solid var(--border); width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .modal-box h3 { margin-top: 0; color: var(--text); font-size: 1.2rem; margin-bottom: 15px; }
+        .modal-box input { width: 100%; padding: 12px; margin: 10px 0 20px; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 12px; font-family: inherit; outline: none;}
+        .btn-save-date { width: 100%; padding: 14px; background: var(--primary); color: #051405; border: none; border-radius: 12px; font-weight: 900; cursor: pointer; margin-bottom: 10px; }
+        .btn-cancel { width: 100%; padding: 14px; background: transparent; color: var(--text); border: 1px solid var(--border); border-radius: 12px; font-weight: 900; cursor: pointer; }
+
+        .slide-item { background: var(--card-sub); border-radius: 12px; padding: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .slide-item img { width: 60px; height: 40px; object-fit: cover; border-radius: 8px; }
+        .slide-item-info { flex: 1; font-size: 0.8rem; font-weight: 600; }
+        .btn-delete { background: rgba(255, 42, 42, 0.1); border: none; color: var(--danger); padding: 8px; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
         .loading-text { text-align: center; color: var(--primary); font-weight: bold; margin-top: 20px; display: none; }
-        .empty-state { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 20px; background: var(--card-sub); border-radius: 12px; }
+        .empty-state { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 30px 20px; background: var(--card-sub); border-radius: 20px; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -107,7 +129,7 @@
             <div class="logo-text">JENNYFIT</div>
             <div class="subtitle">Panel de Administrador</div>
             <button id="btn-google" class="btn-google" onclick="iniciarSesionAdmin()">
-                <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="width:24px; height:24px;"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
                 Iniciar Sesión con Google
             </button>
             <div id="login-loading" class="loading-text">⏳ Verificando...</div>
@@ -116,52 +138,50 @@
 
     <!-- PANTALLA DEL DASHBOARD -->
     <div id="dashboard">
+        <!-- HEADER -->
         <div class="header-admin">
-            <div>
-                <div style="color: var(--primary); font-weight: 900; font-size: 1.2rem;">JENNYFIT ADMIN</div>
-                <div id="admin-email-display" style="font-size: 0.8rem; color: var(--muted);"></div>
+            <div class="header-left">
+                <div class="logo-img-container" onclick="document.getElementById('logo-upload').click()">
+                    <input type="file" id="logo-upload" accept="image/*" style="display:none;" onchange="subirLogoAdmin(event)">
+                    <img id="admin-logo-img" src="" alt="Logo">
+                    <div class="logo-text-small" id="admin-logo-text">JENNYFIT ADMIN</div>
+                </div>
+                <div class="admin-email" id="admin-email-display"></div>
             </div>
             <div class="header-actions">
-                <button id="btn-notif-admin" onclick="activarNotificacionesAdmin()">🔔 Activar Alertas</button>
-                <button id="btn-test-push" onclick="probarNotificacionAdmin()" style="background:var(--card-sub); border:1px solid var(--primary); color:var(--primary); padding:8px 15px; border-radius:8px; font-weight:900; cursor:pointer;">🧪 Probar Push</button>
-                <button id="btn-install-pwa" onclick="instalarAppAdmin()">📲 Instalar App</button>
+                <button class="btn-icon" onclick="cambiarTema()" id="btn-theme" title="Cambiar Tema">🌙</button>
+                <button class="btn-text" id="btn-notif-admin" onclick="activarNotificacionesAdmin()">🔔 Alertas</button>
+                <button class="btn-text" onclick="probarNotificacionAdmin()" style="color:var(--primary);">🧪 Probar</button>
                 <button class="btn-logout" onclick="cerrarSesionAdmin()">Salir</button>
             </div>
-        </div>
-
-        <!-- NAVEGACIÓN DE PESTAÑAS -->
-        <div class="admin-tabs">
-            <button class="admin-tab active" onclick="cambiarTabAdmin('clientes', event)">👥 Clientes</button>
-            <button class="admin-tab" onclick="cambiarTabAdmin('notificaciones', event)">📢 Notificaciones</button>
-            <button class="admin-tab" onclick="cambiarTabAdmin('carrusel', event)">🖼️ Carrusel</button>
         </div>
 
         <!-- PESTAÑA: CLIENTES -->
         <div id="tab-clientes" class="tab-panel active">
             <div class="section-title">
-                Gestión de Clientes
-                <button class="btn-refresh" onclick="recargarManual()">🔄 Actualizar</button>
+                Clientes
+                <button class="btn-text" onclick="recargarManual()">🔄</button>
             </div>
             
-            <input type="text" id="search-client" class="search-input" placeholder="🔍 Buscar por nombre, cédula o correo..." oninput="filtrarYRenderizar()">
+            <input type="text" id="search-client" class="search-input" placeholder="🔍 Buscar nombre, cédula..." oninput="filtrarYRenderizar()">
             
-            <div class="filter-tabs" style="margin-bottom: 15px;">
-                <button class="filter-tab active" data-filter="todos" onclick="cambiarFiltro('todos')">👥 Todos</button>
-                <button class="filter-tab" data-filter="activos" onclick="cambiarFiltro('activos')">✅ Activos</button>
-                <button class="filter-tab" data-filter="proximos" onclick="cambiarFiltro('proximos')">⚠️ Por Vencer</button>
-                <button class="filter-tab" data-filter="vencidos" onclick="cambiarFiltro('vencidos')">⛔ Vencidos</button>
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="todos" onclick="cambiarFiltro('todos')">Todos</button>
+                <button class="filter-tab" data-filter="activos" onclick="cambiarFiltro('activos')">Activos</button>
+                <button class="filter-tab" data-filter="proximos" onclick="cambiarFiltro('proximos')">Por Vencer</button>
+                <button class="filter-tab" data-filter="vencidos" onclick="cambiarFiltro('vencidos')">Vencidos</button>
             </div>
 
-            <div id="loading-clients" class="loading-text">⏳ Cargando clientes...</div>
+            <div id="loading-clients" class="loading-text">⏳ Cargando...</div>
             <div id="clients-container"></div>
         </div>
 
         <!-- PESTAÑA: NOTIFICACIONES -->
         <div id="tab-notificaciones" class="tab-panel">
-            <div class="section-title">📢 Enviar Notificación Push</div>
+            <div class="section-title">Notificación Push</div>
             <div class="form-box">
                 <div class="form-group">
-                    <label>Título de la notificación:</label>
+                    <label>Título:</label>
                     <input type="text" id="notif-title" placeholder="Ej: ¡Nuevo récord en Jennyfit!">
                 </div>
                 <div class="form-group">
@@ -169,38 +189,52 @@
                     <input type="text" id="notif-body" placeholder="Ej: Recuerda tomar agua hoy 💧">
                 </div>
                 <div class="form-group">
-                    <label>Enlace de la Imagen (Opcional, termina en .jpg o .png):</label>
-                    <input type="url" id="notif-image" placeholder="https://ejemplo.com/imagen.jpg">
+                    <label>URL de Imagen (Opcional):</label>
+                    <input type="url" id="notif-image" placeholder="https://...">
                 </div>
-                <button class="btn-primary" onclick="enviarNotificacion()">🚀 Enviar a Todos los Clientes</button>
+                <button class="btn-primary" onclick="enviarNotificacion()">🚀 Enviar a Clientes</button>
                 <div id="notif-status" class="loading-text">⏳ Enviando...</div>
             </div>
         </div>
 
         <!-- PESTAÑA: CARRUSEL -->
         <div id="tab-carrusel" class="tab-panel">
-            <div class="section-title">🖼️ Gestión del Carrusel</div>
-            
+            <div class="section-title">Carrusel</div>
             <div class="form-box">
                 <div class="form-group">
-                    <label>URL de la Imagen (debe terminar en .jpg o .png):</label>
-                    <input type="url" id="carrusel-url" placeholder="https://i.postimg.cc/...">
+                    <label>URL de la Imagen:</label>
+                    <input type="url" id="carrusel-url" placeholder="https://...">
                 </div>
                 <div class="form-group">
                     <label>Texto (Opcional):</label>
                     <input type="text" id="carrusel-texto" placeholder="Ej: Nuevo suplemento disponible">
                 </div>
                 <div class="form-group">
-                    <label>Segundos en pantalla:</label>
+                    <label>Segundos:</label>
                     <input type="number" id="carrusel-segundos" value="5" min="1">
                 </div>
-                <button class="btn-primary" onclick="agregarAlCarrusel()">➕ Añadir al Carrusel</button>
+                <button class="btn-primary" onclick="agregarAlCarrusel()">➕ Añadir</button>
             </div>
 
-            <div class="section-title" style="margin-top: 20px;">Publicidad Actual</div>
+            <div class="section-title" style="margin-top: 20px; font-size: 1rem;">Publicidad Actual</div>
             <div id="carrusel-lista"></div>
         </div>
+    </div>
 
+    <!-- BARRA DE NAVEGACIÓN INFERIOR -->
+    <div class="bottom-nav">
+        <button class="nav-item active" onclick="cambiarTabAdmin('clientes', event)">
+            <span class="icon">👥</span>
+            <span>Clientes</span>
+        </button>
+        <button class="nav-item" onclick="cambiarTabAdmin('notificaciones', event)">
+            <span class="icon">📢</span>
+            <span>Notificaciones</span>
+        </button>
+        <button class="nav-item" onclick="cambiarTabAdmin('carrusel', event)">
+            <span class="icon">🖼️</span>
+            <span>Carrusel</span>
+        </button>
     </div>
 
     <!-- MODAL PARA EDITAR FECHA -->
@@ -214,11 +248,21 @@
         </div>
     </div>
 
+    <!-- MODAL DE CONFIRMACIÓN -->
+    <div id="modal-confirm">
+        <div class="modal-box">
+            <h3 id="confirm-title">¿Estás seguro?</h3>
+            <p id="confirm-msg" style="font-size: 0.9rem; color: var(--muted); margin-bottom: 20px; line-height: 1.4;"></p>
+            <button class="btn-save-date" id="btn-confirm-yes" style="background: var(--danger); color: white;">Sí, continuar</button>
+            <button class="btn-cancel" onclick="cerrarModalConfirm()">Cancelar</button>
+        </div>
+    </div>
+
     <!-- SCRIPTS DE FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-        import { getFirestore, collection, getDocs, doc, updateDoc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc, getDoc, setDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
         import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging.js";
 
         const firebaseConfig = {
@@ -236,7 +280,6 @@
         const provider = new GoogleAuthProvider();
         const CORREO_ADMIN = "jennyfit.gym@gmail.com";
         
-        // Variables para Notificaciones
         const VAPID_KEY = "BLV32kgHGfl0h1gT7NxxIrxhHRVRoww-SYmqYDStzpyz9bGzXqds4p5Xd65X9COE6f0wTWig_MTcoLGU4QqStSI";
         const messaging = getMessaging(app);
         let tokenAdminFCM = localStorage.getItem('jennyfit_admin_fcm_token');
@@ -248,8 +291,8 @@
         let clienteEditandoUID = null;
         let carruselItems = [];
         let unsubscribeClientes = null;
+        let accionPendienteConfirm = null;
 
-        // Elementos DOM
         const loginScreen = document.getElementById('login-screen');
         const dashboard = document.getElementById('dashboard');
         const btnGoogle = document.getElementById('btn-google');
@@ -258,116 +301,118 @@
         const loadingClients = document.getElementById('loading-clients');
         const btnNotifAdmin = document.getElementById('btn-notif-admin');
 
-        // 🚨 LÓGICA PWA 🚨
-        let deferredPrompt;
-        const btnInstallPwa = document.getElementById('btn-install-pwa');
+        // 🚨 TEMA CLARO / OSCURO 🚨
+        function aplicarTema() {
+            const temaGuardado = localStorage.getItem('jennyfit_admin_theme') || 'dark';
+            const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
+            
+            let usarClaro = false;
+            if (temaGuardado === 'light') usarClaro = true;
+            else if (temaGuardado === 'system') usarClaro = mediaQuery.matches;
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            btnInstallPwa.style.display = 'inline-block';
-        });
+            if (usarClaro) document.body.classList.add('light-theme');
+            else document.body.classList.remove('light-theme');
 
-        window.instalarAppAdmin = async function() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') btnInstallPwa.style.display = 'none';
-                deferredPrompt = null;
+            const icon = temaGuardado === 'light' ? '☀️' : (temaGuardado === 'system' ? '📱' : '🌙');
+            document.getElementById('btn-theme').innerText = icon;
+        }
+
+        window.cambiarTema = function() {
+            const actual = localStorage.getItem('jennyfit_admin_theme') || 'dark';
+            let siguiente = 'dark';
+            if (actual === 'dark') siguiente = 'light';
+            else if (actual === 'light') siguiente = 'system';
+            
+            localStorage.setItem('jennyfit_admin_theme', siguiente);
+            aplicarTema();
+        };
+        aplicarTema(); // Ejecutar al cargar
+
+        // 🚨 LOGOTIPO PERSONALIZADO 🚨
+        function cargarLogoGuardado() {
+            const logoB64 = localStorage.getItem('jennyfit_admin_logo');
+            const img = document.getElementById('admin-logo-img');
+            const text = document.getElementById('admin-logo-text');
+            if (logoB64) {
+                img.src = logoB64; img.style.display = 'block'; text.style.display = 'none';
+            } else {
+                img.style.display = 'none'; text.style.display = 'block';
             }
+        }
+        cargarLogoGuardado();
+
+        window.subirLogoAdmin = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                localStorage.setItem('jennyfit_admin_logo', e.target.result);
+                cargarLogoGuardado();
+            };
+            reader.readAsDataURL(file);
         };
 
-        // 🚨 LÓGICA DE NOTIFICACIONES PUSH 🚨
+        // 🚨 LÓGICA DE NOTIFICACIONES 🚨
         window.activarNotificacionesAdmin = async function() {
             try {
                 if (!('Notification' in window)) { alert("Este dispositivo no soporta notificaciones."); return; }
-                
                 const permiso = await Notification.requestPermission();
-                if (permiso !== 'granted') { alert("Debes permitir las notificaciones para recibir alertas."); return; }
+                if (permiso !== 'granted') { alert("Debes permitir las notificaciones."); return; }
 
-                btnNotifAdmin.innerText = "⏳ Conectando...";
-                
+                btnNotifAdmin.innerText = "⏳...";
                 const swReg = await navigator.serviceWorker.register('./sw.js');
                 await navigator.serviceWorker.ready;
-                
-                const currentToken = await getToken(messaging, { 
-                    vapidKey: VAPID_KEY,
-                    serviceWorkerRegistration: swReg 
-                });
+                const currentToken = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });
 
                 if (currentToken) {
                     tokenAdminFCM = currentToken;
                     localStorage.setItem('jennyfit_admin_fcm_token', currentToken);
-                    
                     await setDoc(doc(db, "configuracion", "admin_push"), { token: currentToken });
-
                     btnNotifAdmin.innerText = "🔔 Alertas ON";
                     btnNotifAdmin.classList.add('active');
-                    alert("✅ ¡Notificaciones activadas! Ahora sonará aunque el teléfono esté bloqueado.");
+                    alert("✅ ¡Notificaciones activadas!");
                 } else {
-                    alert("No se pudo generar el token de notificaciones.");
-                    btnNotifAdmin.innerText = "🔔 Activar Alertas";
+                    btnNotifAdmin.innerText = "🔔 Alertas";
                 }
             } catch (error) {
-                console.error("Error activando notificaciones: ", error);
-                alert("Error al activar notificaciones: " + error.message);
-                btnNotifAdmin.innerText = "🔔 Activar Alertas";
+                alert("Error: " + error.message);
+                btnNotifAdmin.innerText = "🔔 Alertas";
             }
         };
 
-        // 🚨 FUNCIÓN DE PRUEBA 🚨
         window.probarNotificacionAdmin = async function() {
             try {
-                alert("Buscando tu token en Firebase para enviar la prueba...");
                 const docSnap = await getDoc(doc(db, "configuracion", "admin_push"));
-                if (!docSnap.exists() || !docSnap.data().token) {
-                    alert("❌ Primero debes tocar el botón '🔔 Activar Alertas' para generar tu token.");
-                    return;
-                }
+                if (!docSnap.exists() || !docSnap.data().token) { alert("❌ Primero activa las alertas."); return; }
                 const miToken = docSnap.data().token;
-
+                
                 const res = await fetch('https://jennyv2.vercel.app/api/enviar-notificacion', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         title: '🧪 Prueba de Alerta Admin',
-                        body: 'Si ves esto, el Push y Vercel funcionan de maravilla.',
+                        body: 'Si ves esto, el Push y Vercel funcionan.',
                         image: 'https://admin-jennyfit.vercel.app/icono-admin-192.png',
                         token: miToken,
                         secret: 'JENNYFIT_ADMIN_2026'
                     })
                 });
-                
                 const data = await res.json();
-                if(data.success) {
-                    alert("✅ El servidor dice que envió la notificación. Si no te llegó a la pantalla de bloqueo, revisa los ajustes de notificaciones de Chrome en tu teléfono.");
-                } else {
-                    alert("❌ El servidor de Vercel dio error: " + data.error);
-                }
-            } catch(e) {
-                alert("❌ Error de conexión: " + e.message);
-            }
+                if(data.success) alert("✅ Notificación enviada.");
+                else alert("❌ Error: " + data.error);
+            } catch(e) { alert("❌ Error de red: " + e.message); }
         };
 
         if (tokenAdminFCM && Notification.permission === 'granted') {
-            btnNotifAdmin.innerText = "🔔 Alertas ON";
-            btnNotifAdmin.classList.add('active');
+            btnNotifAdmin.innerText = "🔔 Alertas ON"; btnNotifAdmin.classList.add('active');
         }
 
-        // 🚨 OBLIGAR A MOSTRAR NOTIFICACIÓN EN PRIMER PLANO 🚨
         onMessage(messaging, (payload) => {
-            console.log('Notificación en primer plano: ', payload);
             const title = payload.notification ? payload.notification.title : 'Alerta Admin';
             const body = payload.notification ? payload.notification.body : 'Revisa tu panel.';
-            
             if (Notification.permission === 'granted') {
                 navigator.serviceWorker.ready.then(reg => {
-                    reg.showNotification(title, { 
-                        body: body, 
-                        icon: 'icono-admin-192.png',
-                        vibrate: [300, 100, 300, 100, 400],
-                        requireInteraction: true
-                    });
+                    reg.showNotification(title, { body: body, icon: 'icono-admin-192.png', vibrate: [300, 100, 300, 100, 400] });
                 });
             }
         });
@@ -378,25 +423,25 @@
                 loginLoading.style.display = 'block'; btnGoogle.style.display = 'none';
                 const result = await signInWithPopup(auth, provider);
                 if (result.user.email !== CORREO_ADMIN) {
-                    await signOut(auth);
-                    alert("⛔ ACCESO DENEGADO\n\nNo tienes permisos de administrador.");
+                    await signOut(auth); alert("⛔ ACCESO DENEGADO.");
                     loginLoading.style.display = 'none'; btnGoogle.style.display = 'flex';
                 }
             } catch (error) {
-                console.error(error); alert("Error: " + error.message);
-                loginLoading.style.display = 'none'; btnGoogle.style.display = 'flex';
+                alert("Error: " + error.message); loginLoading.style.display = 'none'; btnGoogle.style.display = 'flex';
             }
         };
 
         window.cerrarSesionAdmin = async function() { 
-            if (unsubscribeClientes) unsubscribeClientes();
-            await signOut(auth); 
+            if (unsubscribeClientes) unsubscribeClientes(); await signOut(auth); 
         };
 
         window.cambiarTabAdmin = function(tab, event) {
-            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-            if(event && event.target) event.target.classList.add('active');
+            
+            // Encontrar el botón clickeado
+            if(event && event.currentTarget) event.currentTarget.classList.add('active');
+            
             document.getElementById('tab-' + tab).classList.add('active');
             if (tab === 'carrusel') cargarCarruselAdmin();
         };
@@ -408,17 +453,10 @@
 
         // --- MÓDULO CLIENTES ---
         window.cargarClientes = function() {
-            loadingClients.style.display = 'block'; 
-            clientsContainer.innerHTML = '';
-            primeraCargaCompletada = false; 
+            loadingClients.style.display = 'block'; clientsContainer.innerHTML = ''; primeraCargaCompletada = false; 
             
             const conocidosGuardados = localStorage.getItem('jennyfit_admin_known_uids');
-            if (conocidosGuardados) {
-                try {
-                    const arr = JSON.parse(conocidosGuardados);
-                    clientesConocidosUIDs = new Set(arr);
-                } catch(e) {}
-            }
+            if (conocidosGuardados) { try { clientesConocidosUIDs = new Set(JSON.parse(conocidosGuardados)); } catch(e) {} }
 
             try {
                 unsubscribeClientes = onSnapshot(collection(db, "usuarios"), (snapshot) => {
@@ -432,13 +470,9 @@
                             const fechaReg = parseInt((data._syncMeta ? data._syncMeta.ultimaActualizacion : 0) || data.jennyfit_last_ts || 0);
 
                             clientesArrayGlobal.push({
-                                uid: doc.id, 
-                                nombre: data.jennyfit_username, 
-                                email: data.jennyfit_google_email || 'Sin correo',
-                                cedula: data.jennyfit_user_cedula || 'N/A', 
-                                telefono: data.jennyfit_user_telf || 'N/A',
-                                expiraMs: parseInt(data.jennyfit_membership_expiry || '0'),
-                                fechaRegistro: fechaReg
+                                uid: doc.id, nombre: data.jennyfit_username, email: data.jennyfit_google_email || 'Sin correo',
+                                cedula: data.jennyfit_user_cedula || 'N/A', telefono: data.jennyfit_user_telf || 'N/A',
+                                expiraMs: parseInt(data.jennyfit_membership_expiry || '0'), fechaRegistro: fechaReg
                             });
                         }
                     });
@@ -448,7 +482,7 @@
                             if (!clientesConocidosUIDs.has(doc.id)) {
                                 const data = doc.data();
                                 if (data.jennyfit_username) {
-                                    reproducirSonidoNuevoCliente();
+                                    navigator.vibrate([200, 100, 200]);
                                     mostrarAlertaNuevoCliente(data.jennyfit_username);
                                 }
                             }
@@ -458,54 +492,24 @@
                     clientesConocidosUIDs = idsActuales;
                     localStorage.setItem('jennyfit_admin_known_uids', JSON.stringify(Array.from(clientesConocidosUIDs)));
                     primeraCargaCompletada = true;
-
                     clientesArrayGlobal.sort((a, b) => b.fechaRegistro - a.fechaRegistro);
-                    loadingClients.style.display = 'none';
-                    filtrarYRenderizar();
+                    
+                    loadingClients.style.display = 'none'; filtrarYRenderizar();
                 }, (error) => {
                     loadingClients.style.display = 'none';
-                    clientsContainer.innerHTML = `<div class="empty-state" style="color: var(--danger);">Error al conectar con la base de datos.</div>`;
+                    clientsContainer.innerHTML = `<div class="empty-state" style="color: var(--danger);">Error de conexión.</div>`;
                 });
             } catch (error) {
-                loadingClients.style.display = 'none';
-                clientsContainer.innerHTML = `<div class="empty-state" style="color: var(--danger);">Error al cargar la base de datos.</div>`;
+                loadingClients.style.display = 'none'; clientsContainer.innerHTML = `<div class="empty-state">Error al cargar.</div>`;
             }
         };
 
-        function reproducirSonidoNuevoCliente() {
-            try {
-                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (!AudioContextClass) return;
-                const ctx = new AudioContextClass();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(880, ctx.currentTime); 
-                osc.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.1); 
-                gain.gain.setValueAtTime(0.3, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.5);
-            } catch(e) {}
-        }
-
         function mostrarAlertaNuevoCliente(nombre) {
             const alertBox = document.createElement('div');
-            alertBox.style.cssText = `
-                position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-                background: var(--primary); color: #051405; padding: 12px 20px;
-                border-radius: 10px; font-weight: 900; font-size: 0.9rem;
-                box-shadow: 0 5px 20px rgba(57, 255, 20, 0.4); z-index: 99999;
-                animation: fadeIn 0.3s ease-out; text-align: center;
-            `;
-            alertBox.innerHTML = `🔔 ¡Nuevo cliente registrado:<br><b>${nombre}</b>!`;
+            alertBox.style.cssText = `position:fixed; top:20px; left:50%; transform:translateX(-50%); background:var(--primary); color:#051405; padding:12px 20px; border-radius:10px; font-weight:900; z-index:99999; text-align:center; box-shadow:0 5px 20px rgba(57,255,20,0.4);`;
+            alertBox.innerHTML = `🔔 ¡Nuevo cliente:<br>${nombre}!`;
             document.body.appendChild(alertBox);
-            setTimeout(() => {
-                alertBox.style.opacity = '0';
-                setTimeout(() => alertBox.remove(), 300);
-            }, 5000);
+            setTimeout(() => { alertBox.style.opacity = '0'; setTimeout(() => alertBox.remove(), 300); }, 4000);
         }
 
         window.cambiarFiltro = function(filtro) {
@@ -530,32 +534,51 @@
                 return true;
             });
 
-            if (clientesFiltrados.length === 0) { clientsContainer.innerHTML = '<div class="empty-state">No se encontraron clientes.</div>'; return; }
+            if (clientesFiltrados.length === 0) { clientsContainer.innerHTML = '<div class="empty-state">No hay clientes.</div>'; return; }
 
             clientesFiltrados.forEach(cliente => {
                 const activo = cliente.expiraMs > Date.now();
                 const diasRestantes = (cliente.expiraMs - Date.now()) / (1000 * 60 * 60 * 24);
-                let claseCard = 'status-expired'; let claseBadge = 'badge-expired'; let textoEstado = '⛔ Vencido';
+                let claseCard = 'status-expired'; let claseBadge = 'badge-expired'; let textoEstado = 'Vencido';
                 
                 if (activo) {
-                    if (diasRestantes <= 5) { claseCard = 'status-warning'; claseBadge = 'badge-warning'; textoEstado = `⚠️ Vence en ${Math.ceil(diasRestantes)} días`; }
-                    else { claseCard = 'status-active'; claseBadge = 'badge-active'; textoEstado = `✅ Activo hasta: ${new Date(cliente.expiraMs).toLocaleDateString('es-VE')}`; }
+                    if (diasRestantes <= 5) { claseCard = 'status-warning'; claseBadge = 'badge-warning'; textoEstado = `Vence en ${Math.ceil(diasRestantes)} días`; }
+                    else { claseCard = 'status-active'; claseBadge = 'badge-active'; textoEstado = `Activo`; }
                 }
 
                 const card = document.createElement('div');
                 card.className = `client-card ${claseCard}`;
                 card.innerHTML = `
-                    <div class="client-name">${cliente.nombre}</div>
-                    <div class="client-info">📧 ${cliente.email} <br>🪪 ${cliente.cedula} | 📲 ${cliente.telefono}</div>
-                    <div class="status-badge ${claseBadge}">${textoEstado}</div>
+                    <div class="client-header">
+                        <div class="client-name">${cliente.nombre}</div>
+                        <div class="status-badge ${claseBadge}">${textoEstado}</div>
+                    </div>
+                    <div class="client-info">
+                        <span>📧 ${cliente.email}</span>
+                        <span>🪪 ${cliente.cedula} | 📲 ${cliente.telefono}</span>
+                        <span>📅 Vence: ${cliente.expiraMs > 0 ? new Date(cliente.expiraMs).toLocaleDateString('es-VE') : 'Sin activar'}</span>
+                    </div>
                     <div class="card-actions">
-                        <button class="btn-card btn-edit" onclick="abrirModalFecha('${cliente.uid}', '${cliente.nombre}', ${cliente.expiraMs})">📅 Editar Fecha</button>
+                        <button class="btn-card btn-edit" onclick="abrirModalFecha('${cliente.uid}', '${cliente.nombre}', ${cliente.expiraMs})">📅 Fecha</button>
+                        <button class="btn-card btn-history" onclick="borrarHistorialCliente('${cliente.uid}', '${cliente.nombre}')">🧹 Historial</button>
                         <button class="btn-card btn-block" onclick="bloquearCliente('${cliente.uid}', '${cliente.nombre}')">⛔ Bloquear</button>
+                        <button class="btn-card btn-delete-user" onclick="eliminarCliente('${cliente.uid}', '${cliente.nombre}')">🗑️ Eliminar</button>
                     </div>`;
                 clientsContainer.appendChild(card);
             });
         };
 
+        // MODAL CONFIRMACIÓN UNIVERSAL
+        window.abrirModalConfirm = function(titulo, mensaje, callback) {
+            document.getElementById('confirm-title').innerText = titulo;
+            document.getElementById('confirm-msg').innerText = mensaje;
+            accionPendienteConfirm = callback;
+            document.getElementById('modal-confirm').style.display = 'flex';
+        };
+        window.cerrarModalConfirm = function() { document.getElementById('modal-confirm').style.display = 'none'; accionPendienteConfirm = null; };
+        document.getElementById('btn-confirm-yes').onclick = () => { if(accionPendienteConfirm) accionPendienteConfirm(); cerrarModalConfirm(); };
+
+        // ACCIONES DE CLIENTES
         window.abrirModalFecha = function(uid, nombre, expiraMs) {
             clienteEditandoUID = uid;
             document.getElementById('modal-cliente-nombre').innerText = nombre;
@@ -575,15 +598,39 @@
             } catch (error) { alert("Error: " + error.message); }
         };
 
-        window.bloquearCliente = async function(uid, nombre) {
-            if (!confirm(`¿Bloquear a ${nombre}?`)) return;
-            try {
-                await updateDoc(doc(db, "usuarios", uid), { jennyfit_membership_expiry: "0" });
-                alert(`⛔ ${nombre} bloqueado.`); 
-            } catch (error) { alert("Error: " + error.message); }
+        window.bloquearCliente = function(uid, nombre) {
+            abrirModalConfirm("Bloquear Cliente", `¿Bloquear a ${nombre}? Se le pedirá pago para volver a entrar.`, async () => {
+                try { await updateDoc(doc(db, "usuarios", uid), { jennyfit_membership_expiry: "0" }); } 
+                catch (error) { alert("Error: " + error.message); }
+            });
         };
 
-        // --- MÓDULO NOTIFICACIONES (ENVIAR A CLIENTES) ---
+        window.borrarHistorialCliente = function(uid, nombre) {
+            abrirModalConfirm("Borrar Historial", `¿Borrar todas las rutinas y comidas de ${nombre}? (La cuenta no se borra).`, async () => {
+                try {
+                    await updateDoc(doc(db, "usuarios", uid), {
+                        jennyfit_workouts: "[]",
+                        jennyfit_nutrition: "[]",
+                        jennyfit_body_measures: "[]",
+                        jennyfit_day_modes: "{}"
+                    });
+                    alert("✅ Historial borrado.");
+                } catch (error) { alert("Error: " + error.message); }
+            });
+        };
+
+        window.eliminarCliente = function(uid, nombre) {
+            abrirModalConfirm("Eliminar Cliente", `⚠️ ¿Eliminar definitivamente a ${nombre}? Si vuelve a entrar, tendrá que registrarse de nuevo.`, async () => {
+                try {
+                    await deleteDoc(doc(db, "usuarios", uid));
+                    // Lo quitamos de la memoria para que no salte alerta falsa
+                    clientesConocidosUIDs.delete(uid);
+                    localStorage.setItem('jennyfit_admin_known_uids', JSON.stringify(Array.from(clientesConocidosUIDs)));
+                } catch (error) { alert("Error al eliminar: " + error.message); }
+            });
+        };
+
+        // --- MÓDULO NOTIFICACIONES MASIVAS ---
         window.enviarNotificacion = async function() {
             const title = document.getElementById('notif-title').value.trim();
             const body = document.getElementById('notif-body').value.trim();
@@ -591,29 +638,19 @@
             const status = document.getElementById('notif-status');
             
             if (!title || !body) { alert("Escribe título y mensaje."); return; }
-            
             status.style.display = 'block';
             try {
                 const res = await fetch('https://jennyv2.vercel.app/api/enviar-notificacion', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ title, body, image, topic: 'noticias_jennyfit', secret: 'JENNYFIT_ADMIN_2026' })
                 });
-                
                 if (!res.ok) throw new Error(await res.text());
-
                 const data = await res.json();
                 if (data.success) {
-                    alert("✅ ¡Notificación enviada!");
-                    document.getElementById('notif-title').value = '';
-                    document.getElementById('notif-body').value = '';
-                    document.getElementById('notif-image').value = '';
-                } else { 
-                    alert("❌ Error del servidor: " + data.error); 
-                }
-            } catch (e) { 
-                console.error(e); alert("❌ Error: " + e.message); 
-            }
+                    alert("✅ ¡Enviada!");
+                    document.getElementById('notif-title').value = ''; document.getElementById('notif-body').value = '';
+                } else alert("❌ Error: " + data.error);
+            } catch (e) { alert("❌ Error: " + e.message); }
             finally { status.style.display = 'none'; }
         };
 
@@ -623,18 +660,15 @@
             lista.innerHTML = 'Cargando...';
             try {
                 const docSnap = await getDoc(doc(db, "configuracion", "carrusel"));
-                if (docSnap.exists() && docSnap.data().items) {
-                    carruselItems = docSnap.data().items;
-                } else {
-                    carruselItems = [];
-                }
+                if (docSnap.exists() && docSnap.data().items) carruselItems = docSnap.data().items;
+                else carruselItems = [];
                 renderizarCarruselAdmin();
             } catch (e) { lista.innerHTML = 'Error al cargar.'; }
         };
 
         window.renderizarCarruselAdmin = function() {
             const lista = document.getElementById('carrusel-lista');
-            if (carruselItems.length === 0) { lista.innerHTML = '<div class="empty-state">No hay imágenes en el carrusel.</div>'; return; }
+            if (carruselItems.length === 0) { lista.innerHTML = '<div class="empty-state">Sin imágenes.</div>'; return; }
             lista.innerHTML = '';
             carruselItems.forEach((item, index) => {
                 const div = document.createElement('div');
@@ -642,8 +676,7 @@
                 div.innerHTML = `
                     <img src="${item.url}" alt="Slide">
                     <div class="slide-item-info">
-                        <b>${item.texto || 'Sin texto'}</b>
-                        ${item.segundos} segundos
+                        <b>${item.texto || 'Sin texto'}</b><br>${item.segundos} seg
                     </div>
                     <button class="btn-delete" onclick="eliminarDelCarrusel(${index})">🗑️</button>
                 `;
@@ -655,28 +688,22 @@
             const url = document.getElementById('carrusel-url').value.trim();
             const texto = document.getElementById('carrusel-texto').value.trim();
             const segundos = parseInt(document.getElementById('carrusel-segundos').value) || 5;
-            if (!url) { alert("La URL de la imagen es obligatoria."); return; }
+            if (!url) { alert("URL obligatoria."); return; }
             carruselItems.push({ url, texto, segundos });
-            await guardarCarruselEnFirebase();
-            document.getElementById('carrusel-url').value = '';
-            document.getElementById('carrusel-texto').value = '';
-            alert("✅ Imagen añadida al carrusel.");
+            await setDoc(doc(db, "configuracion", "carrusel"), { items: carruselItems });
+            renderizarCarruselAdmin();
+            document.getElementById('carrusel-url').value = ''; document.getElementById('carrusel-texto').value = '';
+            alert("✅ Añadida.");
         };
 
         window.eliminarDelCarrusel = async function(index) {
-            if (!confirm("¿Eliminar esta imagen del carrusel?")) return;
+            if (!confirm("¿Eliminar imagen?")) return;
             carruselItems.splice(index, 1);
-            await guardarCarruselEnFirebase();
+            await setDoc(doc(db, "configuracion", "carrusel"), { items: carruselItems });
+            renderizarCarruselAdmin();
         };
 
-        async function guardarCarruselEnFirebase() {
-            try {
-                await setDoc(doc(db, "configuracion", "carrusel"), { items: carruselItems });
-                renderizarCarruselAdmin();
-            } catch (e) { alert("Error al guardar en Firebase."); }
-        }
-
-        // Observador de sesión
+        // --- OBSERVADOR DE SESIÓN ---
         onAuthStateChanged(auth, (user) => {
             if (user && user.email === CORREO_ADMIN) {
                 loginScreen.style.display = 'none'; dashboard.style.display = 'block';
