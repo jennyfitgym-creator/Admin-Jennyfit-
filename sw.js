@@ -15,20 +15,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-// Evento que se dispara cuando llega una notificación Push y la app está cerrada o en segundo plano
+// 🚨 DEJAMOS QUE FIREBASE MANEJE LA NOTIFICACIÓN AUTOMÁTICAMENTE
+// Al no poner self.registration.showNotification aquí, evitamos que salga doble.
 messaging.onBackgroundMessage((payload) => {
     console.log('[sw.js] Notificación recibida en segundo plano: ', payload);
-    
-    const notificationTitle = payload.notification ? payload.notification.title : (payload.data ? payload.data.title : 'Nuevo aviso en Jennyfit');
-    const notificationOptions = {
-        body: payload.notification ? payload.notification.body : (payload.data ? payload.data.body : 'Revisa tu panel de administrador.'),
-        icon: 'icono-admin-192.png', // Asegúrate de que este sea el nombre de tu ícono
-        badge: 'icono-admin-192.png',
-        vibrate: [300, 100, 300, 100, 400],
-        data: { url: './' }
-    };
-
-    self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 // Evento para abrir la app cuando tocan la notificación
