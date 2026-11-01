@@ -267,7 +267,6 @@
         };
 
         window.recargarManual = function() {
-            // Al recargar manualmente, forzamos que lea la memoria guardada
             if (unsubscribeClientes) unsubscribeClientes();
             cargarClientes();
         };
@@ -276,9 +275,8 @@
         window.cargarClientes = function() {
             loadingClients.style.display = 'block'; 
             clientsContainer.innerHTML = '';
-            primeraCargaCompletada = false; // Reiniciamos bandera para esta sesión
+            primeraCargaCompletada = false; 
             
-            // Recuperar clientes conocidos del localStorage para que no salten alertas de viejos
             const conocidosGuardados = localStorage.getItem('jennyfit_admin_known_uids');
             if (conocidosGuardados) {
                 try {
@@ -288,41 +286,51 @@
             }
 
             try {
-                // 🚨 RADAR EN TIEMPO REAL (onSnapshot)
                 unsubscribeClientes = onSnapshot(collection(db, "usuarios"), (snapshot) => {
                     clientesArrayGlobal = [];
-                    let hayNuevos = false;
+                    let idsActuales = new Set();
                     
                     snapshot.forEach((doc) => {
                         const data = doc.data();
                         if (data.jennyfit_username) {
-                            
-                            // 🚨 LÓGICA CORREGIDA: Solo alerta si ya cargó la primera vez y NO conoce al cliente
-                            if (primeraCargaCompletada && !clientesConocidosUIDs.has(doc.id)) {
-                                reproducirSonidoNuevoCliente();
-                                mostrarAlertaNuevoCliente(data.jennyfit_username);
-                                hayNuevos = true;
-                            }
-                            
-                            clientesConocidosUIDs.add(doc.id);
+                            idsActuales.add(doc.id);
+
+                            // 🚨 LEER FECHA CORRECTA DESDE EL SYNC DE LA APP
+                            const fechaReg = parseInt((data._syncMeta ? data._syncMeta.ultimaActualizacion : 0) || data.jennyfit_last_ts || 0);
 
                             clientesArrayGlobal.push({
-                                uid: doc.id, nombre: data.jennyfit_username, email: data.jennyfit_google_email || 'Sin correo',
-                                cedula: data.jennyfit_user_cedula || 'N/A', telefono: data.jennyfit_user_telf || 'N/A',
-                                expiraMs: parseInt(data.jennyfit_membership_expiry || '0')
+                                uid: doc.id, 
+                                nombre: data.jennyfit_username, 
+                                email: data.jennyfit_google_email || 'Sin correo',
+                                cedula: data.jennyfit_user_cedula || 'N/A', 
+                                telefono: data.jennyfit_user_telf || 'N/A',
+                                expiraMs: parseInt(data.jennyfit_membership_expiry || '0'),
+                                fechaRegistro: fechaReg
                             });
                         }
                     });
                     
-                    // Si se detectaron nuevos, guardamos la lista actualizada en el teléfono
-                    if (hayNuevos) {
-                        localStorage.setItem('jennyfit_admin_known_uids', JSON.stringify(Array.from(clientesConocidosUIDs)));
+                    // 🚨 LÓGICA DE ALERTA CORREGIDA
+                    if (primeraCargaCompletada) {
+                        snapshot.forEach((doc) => {
+                            if (!clientesConocidosUIDs.has(doc.id)) {
+                                const data = doc.data();
+                                if (data.jennyfit_username) {
+                                    reproducirSonidoNuevoCliente();
+                                    mostrarAlertaNuevoCliente(data.jennyfit_username);
+                                }
+                            }
+                        });
                     }
-                    
-                    // Marcamos que la primera carga ya terminó
+
+                    // Guardar memoria local SIEMPRE
+                    clientesConocidosUIDs = idsActuales;
+                    localStorage.setItem('jennyfit_admin_known_uids', JSON.stringify(Array.from(clientesConocidosUIDs)));
                     primeraCargaCompletada = true;
 
-                    clientesArrayGlobal.sort((a, b) => a.nombre.localeCompare(b.nombre));
+                    // Ordenar por fecha (más nuevos primero)
+                    clientesArrayGlobal.sort((a, b) => b.fechaRegistro - a.fechaRegistro);
+
                     loadingClients.style.display = 'none';
                     filtrarYRenderizar();
                 }, (error) => {
@@ -336,7 +344,6 @@
             }
         };
 
-        // 🚨 NUEVAS FUNCIONES DE AVISO
         function reproducirSonidoNuevoCliente() {
             try {
                 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -356,7 +363,7 @@
                 gain.connect(ctx.destination);
                 osc.start();
                 osc.stop(ctx.currentTime + 0.5);
-            } catch(e) { console.log("Audio bloqueado por el navegador hasta que haya interacción."); }
+            } catch(e) { console.log("Audio bloqueado por el navegador."); }
         }
 
         function mostrarAlertaNuevoCliente(nombre) {
@@ -366,9 +373,9 @@
                 background: var(--primary); color: #051405; padding: 12px 20px;
                 border-radius: 10px; font-weight: 900; font-size: 0.9rem;
                 box-shadow: 0 5px 20px rgba(57, 255, 20, 0.4); z-index: 99999;
-                animation: fadeIn 0.3s ease-out;
+                animation: fadeIn 0.3s ease-out; text-align: center;
             `;
-            alertBox.innerHTML = `🔔 ¡Nuevo cliente registrado: <b>${nombre}</b>!`;
+            alertBox.innerHTML = `🔔 ¡Nuevo cliente registrado:<br><b>${nombre}</b>!`;
             document.body.appendChild(alertBox);
             
             setTimeout(() => {
@@ -558,7 +565,7 @@
             if (user && user.email === CORREO_ADMIN) {
                 loginScreen.style.display = 'none'; dashboard.style.display = 'block';
                 document.getElementById('admin-email-display').innerText = user.email;
-                cargarClientes(); // Llama al radar
+                cargarClientes(); 
             } else {
                 loginScreen.style.display = 'flex'; dashboard.style.display = 'none';
                 loginLoading.style.display = 'none'; btnGoogle.style.display = 'flex';
