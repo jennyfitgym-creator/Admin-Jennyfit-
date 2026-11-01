@@ -220,6 +220,7 @@
 
         let clientesArrayGlobal = [];
         let clientesConocidosUIDs = new Set();
+        let primeraCargaCompletada = false;
         let filtroActual = 'todos';
         let clienteEditandoUID = null;
         let carruselItems = [];
@@ -266,7 +267,7 @@
         };
 
         window.recargarManual = function() {
-            clientesConocidosUIDs.clear();
+            // Al recargar manualmente, forzamos que lea la memoria guardada
             if (unsubscribeClientes) unsubscribeClientes();
             cargarClientes();
         };
@@ -275,19 +276,34 @@
         window.cargarClientes = function() {
             loadingClients.style.display = 'block'; 
             clientsContainer.innerHTML = '';
+            primeraCargaCompletada = false; // Reiniciamos bandera para esta sesión
+            
+            // Recuperar clientes conocidos del localStorage para que no salten alertas de viejos
+            const conocidosGuardados = localStorage.getItem('jennyfit_admin_known_uids');
+            if (conocidosGuardados) {
+                try {
+                    const arr = JSON.parse(conocidosGuardados);
+                    clientesConocidosUIDs = new Set(arr);
+                } catch(e) {}
+            }
+
             try {
                 // 🚨 RADAR EN TIEMPO REAL (onSnapshot)
                 unsubscribeClientes = onSnapshot(collection(db, "usuarios"), (snapshot) => {
                     clientesArrayGlobal = [];
+                    let hayNuevos = false;
                     
                     snapshot.forEach((doc) => {
                         const data = doc.data();
                         if (data.jennyfit_username) {
-                            // 🚨 DETECTOR DE CLIENTE NUEVO
-                            if (!clientesConocidosUIDs.has(doc.id) && clientesConocidosUIDs.size > 0) {
+                            
+                            // 🚨 LÓGICA CORREGIDA: Solo alerta si ya cargó la primera vez y NO conoce al cliente
+                            if (primeraCargaCompletada && !clientesConocidosUIDs.has(doc.id)) {
                                 reproducirSonidoNuevoCliente();
                                 mostrarAlertaNuevoCliente(data.jennyfit_username);
+                                hayNuevos = true;
                             }
+                            
                             clientesConocidosUIDs.add(doc.id);
 
                             clientesArrayGlobal.push({
@@ -298,6 +314,14 @@
                         }
                     });
                     
+                    // Si se detectaron nuevos, guardamos la lista actualizada en el teléfono
+                    if (hayNuevos) {
+                        localStorage.setItem('jennyfit_admin_known_uids', JSON.stringify(Array.from(clientesConocidosUIDs)));
+                    }
+                    
+                    // Marcamos que la primera carga ya terminó
+                    primeraCargaCompletada = true;
+
                     clientesArrayGlobal.sort((a, b) => a.nombre.localeCompare(b.nombre));
                     loadingClients.style.display = 'none';
                     filtrarYRenderizar();
@@ -417,7 +441,6 @@
             try {
                 await updateDoc(doc(db, "usuarios", clienteEditandoUID), { jennyfit_membership_expiry: String(nuevaFechaMs) });
                 alert("✅ Fecha actualizada."); cerrarModalFecha(); 
-                // Ya no hace falta recargar, el radar lo actualiza solo.
             } catch (error) { alert("Error: " + error.message); }
         };
 
@@ -426,7 +449,6 @@
             try {
                 await updateDoc(doc(db, "usuarios", uid), { jennyfit_membership_expiry: "0" });
                 alert(`⛔ ${nombre} bloqueado.`); 
-                // Ya no hace falta recargar, el radar lo actualiza solo.
             } catch (error) { alert("Error: " + error.message); }
         };
 
@@ -536,9 +558,7 @@
             if (user && user.email === CORREO_ADMIN) {
                 loginScreen.style.display = 'none'; dashboard.style.display = 'block';
                 document.getElementById('admin-email-display').innerText = user.email;
-                // Al loguearse, limpiamos la memoria y llamamos al radar
-                clientesConocidosUIDs.clear();
-                cargarClientes();
+                cargarClientes(); // Llama al radar
             } else {
                 loginScreen.style.display = 'flex'; dashboard.style.display = 'none';
                 loginLoading.style.display = 'none'; btnGoogle.style.display = 'flex';
