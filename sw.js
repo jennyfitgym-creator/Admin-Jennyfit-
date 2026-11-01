@@ -1,4 +1,3 @@
-// Service Worker para habilitar PWA y recibir notificaciones Push
 importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js');
 
@@ -11,17 +10,15 @@ const firebaseConfig = {
     appId: "1:492885885548:web:64d40ccffe8dad340f4e49"
 };
 
-// Inicializamos Firebase en el Service Worker
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-// 🚨 DEJAMOS QUE FIREBASE MANEJE LA NOTIFICACIÓN AUTOMÁTICAMENTE
-// Al no poner self.registration.showNotification aquí, evitamos que salga doble.
+// Firebase maneja la visualización de la notificación automáticamente
 messaging.onBackgroundMessage((payload) => {
-    console.log('[sw.js] Notificación recibida en segundo plano: ', payload);
+    console.log('[sw.js] Notificación recibida: ', payload);
 });
 
-// Evento para abrir la app cuando tocan la notificación
+// Al tocar la notificación, abrir la app
 self.addEventListener('notificationclick', function(event) {
     event.notification.close();
     event.waitUntil(
@@ -41,4 +38,4 @@ self.addEventListener('notificationclick', function(event) {
 
 self.addEventListener('install', (event) => { self.skipWaiting(); });
 self.addEventListener('activate', (event) => { event.waitUntil(clients.claim()); });
-self.addEventListener('fetch', (event) => { /* Dejar pasar las peticiones */ });
+self.addEventListener('fetch', (event) => { /* Peticiones normales */ });
