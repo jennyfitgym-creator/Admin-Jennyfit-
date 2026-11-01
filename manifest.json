@@ -1,25 +1,35 @@
 {
-  "id": "/",
   "name": "Jennyfit Admin",
   "short_name": "JF Admin",
   "description": "Panel de administración de Jennyfit",
   "start_url": "./",
-  "scope": "./",
   "display": "standalone",
   "background_color": "#0b0d0c",
   "theme_color": "#39FF14",
   "icons": [
     {
-      "src": "Iconojennyfit.png",
+      "src": "icono-admin-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "Iconojennyfit.png",
+      "src": "icono-admin-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icono-admin-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "icono-admin-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
