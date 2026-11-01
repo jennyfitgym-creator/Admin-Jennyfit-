@@ -277,7 +277,7 @@
             }
         };
 
-        // 🚨 LÓGICA DE NOTIFICACIONES PUSH (GUARDAR TOKEN EN FIRESTORE) 🚨
+        // 🚨 LÓGICA DE NOTIFICACIONES PUSH 🚨
         window.activarNotificacionesAdmin = async function() {
             try {
                 if (!('Notification' in window)) { alert("Este dispositivo no soporta notificaciones."); return; }
@@ -287,11 +287,9 @@
 
                 btnNotifAdmin.innerText = "⏳ Conectando...";
                 
-                // 1. Registrar SW y esperar
                 const swReg = await navigator.serviceWorker.register('./sw.js');
                 await navigator.serviceWorker.ready;
                 
-                // 2. Obtener Token
                 const currentToken = await getToken(messaging, { 
                     vapidKey: VAPID_KEY,
                     serviceWorkerRegistration: swReg 
@@ -301,7 +299,6 @@
                     tokenAdminFCM = currentToken;
                     localStorage.setItem('jennyfit_admin_fcm_token', currentToken);
                     
-                    // 3. Guardar el Token en Firestore (Caja Fuerte)
                     await setDoc(doc(db, "configuracion", "admin_push"), { token: currentToken });
 
                     btnNotifAdmin.innerText = "🔔 Alertas ON";
@@ -318,11 +315,10 @@
             }
         };
 
-        // 🚨 FUNCIÓN DE PRUEBA (Lee el token de Firestore y lo manda a Vercel)
+        // 🚨 FUNCIÓN DE PRUEBA 🚨
         window.probarNotificacionAdmin = async function() {
             try {
                 alert("Buscando tu token en Firebase para enviar la prueba...");
-                // Buscar el token guardado
                 const docSnap = await getDoc(doc(db, "configuracion", "admin_push"));
                 if (!docSnap.exists() || !docSnap.data().token) {
                     alert("❌ Primero debes tocar el botón '🔔 Activar Alertas' para generar tu token.");
@@ -336,8 +332,8 @@
                     body: JSON.stringify({
                         title: '🧪 Prueba de Alerta Admin',
                         body: 'Si ves esto, el Push y Vercel funcionan de maravilla.',
-                        image: 'https://jennyfitapp.firebasestorage.app/Iconojennyfit.png',
-                        token: miToken, // 🚨 AHORA ENVIAMOS TOKEN, NO TOPIC
+                        image: 'https://admin-jennyfit.vercel.app/icono-admin-192.png',
+                        token: miToken,
                         secret: 'JENNYFIT_ADMIN_2026'
                     })
                 });
@@ -353,15 +349,27 @@
             }
         };
 
-        // Verificar si ya estaban activas al cargar
         if (tokenAdminFCM && Notification.permission === 'granted') {
             btnNotifAdmin.innerText = "🔔 Alertas ON";
             btnNotifAdmin.classList.add('active');
         }
 
-        // Escuchar notificaciones mientras la app está abierta
+        // 🚨 OBLIGAR A MOSTRAR NOTIFICACIÓN EN PRIMER PLANO 🚨
         onMessage(messaging, (payload) => {
             console.log('Notificación en primer plano: ', payload);
+            const title = payload.notification ? payload.notification.title : 'Alerta Admin';
+            const body = payload.notification ? payload.notification.body : 'Revisa tu panel.';
+            
+            if (Notification.permission === 'granted') {
+                navigator.serviceWorker.ready.then(reg => {
+                    reg.showNotification(title, { 
+                        body: body, 
+                        icon: 'icono-admin-192.png',
+                        vibrate: [300, 100, 300, 100, 400],
+                        requireInteraction: true
+                    });
+                });
+            }
         });
 
         // --- LOGIN Y SESIÓN ---
@@ -575,7 +583,7 @@
             } catch (error) { alert("Error: " + error.message); }
         };
 
-        // --- MÓDULO NOTIFICACIONES (ENVIAR A CLIENTES MASIVO) ---
+        // --- MÓDULO NOTIFICACIONES (ENVIAR A CLIENTES) ---
         window.enviarNotificacion = async function() {
             const title = document.getElementById('notif-title').value.trim();
             const body = document.getElementById('notif-body').value.trim();
@@ -589,7 +597,6 @@
                 const res = await fetch('https://jennyv2.vercel.app/api/enviar-notificacion', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // AQUÍ SEGUIMOS USANDO TOPIC PARA LOS CLIENTES
                     body: JSON.stringify({ title, body, image, topic: 'noticias_jennyfit', secret: 'JENNYFIT_ADMIN_2026' })
                 });
                 
