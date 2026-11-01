@@ -7,6 +7,7 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(clients.claim());
 });
 
+// Chrome exige que exista un evento 'fetch', aunque no haga nada
 self.addEventListener('fetch', (event) => {
-    // Dejamos pasar las peticiones normales. Esto solo autoriza la instalación de la app.
+    // Dejamos pasar las peticiones normales.
 });
