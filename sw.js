@@ -1,4 +1,4 @@
-// sw.js para el Panel de Admin
+// sw.js - Service Worker para el Panel de Admin
 importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js');
 
@@ -13,9 +13,8 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Manejar notificaciones en segundo plano
 messaging.onBackgroundMessage((payload) => {
-  console.log('[sw.js] Notificación en segundo plano recibida:', payload);
+  console.log('[sw.js] Notificación en segundo plano:', payload);
   
   const notificationTitle = payload.notification?.title || 'Jennyfit Admin';
   const notificationOptions = {
@@ -27,7 +26,6 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// Al tocar la notificación, abrir el panel
 self.addEventListener('notificationclick', function(event) {
   event.notification.close();
   event.waitUntil(
