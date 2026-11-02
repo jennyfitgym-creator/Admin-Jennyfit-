@@ -359,14 +359,16 @@
         </div>
     </div>
 
-    <!-- 🚨 NUEVO MODAL PARA VER ENTRENOS 🚨 -->
+    <!-- MODAL PARA VER ENTRENOS -->
     <div id="modal-ver-entrenos">
         <div class="modal-box" style="text-align: left; max-width: 440px;">
             <h3 id="ver-entrenos-title" style="color: var(--primary); margin-bottom: 10px;">Historial de Entrenos</h3>
             <div id="ver-entrenos-content" style="max-height: 60vh; overflow-y: auto; font-size: 0.85rem;"></div>
             <button class="btn-cancel" style="margin-top: 15px;" onclick="document.getElementById('modal-ver-entrenos').style.display = 'none'">Cerrar</button>
         </div>
-    </div>    <!-- SCRIPTS DE FIREBASE -->
+    </div>
+
+    <!-- SCRIPTS DE FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
@@ -544,13 +546,24 @@
                 try {
                     if (!('Notification' in window)) { alert("Este dispositivo no soporta notificaciones."); return; }
                     const permiso = await Notification.requestPermission();
-                    if (permiso !== 'granted') { alert("Debes permitir las notificaciones."); return; }
+                    if (permiso !== 'granted') { alert("Debes permitir las notificaciones en tu navegador."); return; }
 
                     btnNotifAdmin.innerText = "Conectando...";
-                    const swReg = await navigator.serviceWorker.register('./sw.js');
-                    await navigator.serviceWorker.ready;
                     
-                    const currentToken = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: swReg });
+                    // 1. Registrar el Service Worker
+                    const swReg = await navigator.serviceWorker.register('./sw.js', { scope: './' });
+                    
+                    // 2. Esperar a que esté listo (con un timeout de seguridad para evitar bloqueos)
+                    await Promise.race([
+                        navigator.serviceWorker.ready,
+                        new Promise(resolve => setTimeout(resolve, 2000))
+                    ]);
+                    
+                    // 3. Obtener el token de FCM
+                    const currentToken = await getToken(messaging, { 
+                        vapidKey: VAPID_KEY, 
+                        serviceWorkerRegistration: swReg 
+                    });
 
                     if (currentToken) {
                         tokenAdminFCM = currentToken;
@@ -559,12 +572,14 @@
                         
                         btnNotifAdmin.innerText = "Activadas";
                         btnNotifAdmin.classList.add('active');
-                        alert("✅ ¡Notificaciones activadas!");
+                        alert("✅ ¡Notificaciones activadas correctamente!");
                     } else {
                         btnNotifAdmin.innerText = "Desactivadas";
+                        alert("No se pudo generar el token. Intenta de nuevo.");
                     }
                 } catch (error) {
-                    alert("Error: " + error.message);
+                    console.error(error);
+                    alert("Error de conexión: " + error.message + "\n\nAsegúrate de estar usando HTTPS y que el archivo sw.js exista.");
                     btnNotifAdmin.innerText = "Desactivadas";
                 }
             }
@@ -786,7 +801,6 @@
                 const card = document.createElement('div');
                 card.className = `client-card ${claseCard}`;
                 
-                // 🚨 AGREGAMOS EL BOTÓN DE "VER ENTRENOS" 🚨
                 card.innerHTML = `
                     <div class="client-header">
                         <div class="client-name">${cliente.nombre}</div>
@@ -813,7 +827,7 @@
             });
         };
 
-        // 🚨 NUEVA FUNCIÓN: VER ENTRENOS DEL CLIENTE 🚨
+        // 🚨 FUNCIÓN CORREGIDA: VER ENTRENOS DEL CLIENTE 🚨
         window.verEntrenosCliente = async function(uid, nombre) {
             const modal = document.getElementById('modal-ver-entrenos');
             const title = document.getElementById('ver-entrenos-title');
@@ -824,10 +838,9 @@
             modal.style.display = 'flex';
 
             try {
-                const { fsMod } = await cargarModulosFirebase();
-                const { db } = await inicializarFirebaseCompleto();
-                const docRef = fsMod.doc(db, 'usuarios', uid);
-                const docSnap = await fsMod.getDoc(docRef);
+                // Usamos doc() y getDoc() directamente, ya que están importados arriba
+                const docRef = doc(db, 'usuarios', uid);
+                const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
@@ -1097,7 +1110,7 @@
             });
         };
 
-        // 🚨 FUNCIÓN: REVERTIR PAGO DE REFERIDO ??
+        // 🚨 FUNCIÓN: REVERTIR PAGO DE REFERIDO 🚨
         window.revertirPagoReferido = function(uidReferido, codigoReferente, nombreReferido) {
             abrirModalConfirm("Revertir Pago de Referido", `⚠️ ¿Seguro que quieres deshacer la validación de ${nombreReferido}? Se le quitarán los $5 de descuento que se le dieron a su padrino.`, async () => {
                 try {
