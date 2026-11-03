@@ -1,4 +1,8 @@
 // sw.js - Service Worker para el Panel de Admin
+const SW_VERSION = '1.0.2'; // Cambiar este número obliga al teléfono a actualizar
+self.addEventListener('install', (event) => { self.skipWaiting(); });
+self.addEventListener('activate', (event) => { event.waitUntil(clients.claim()); });
+
 importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js');
 
@@ -13,17 +17,11 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
+// 🚨 NO dibujamos la notificación manualmente.
+// El servidor ya envía el bloque "notification" y FCM la muestra automáticamente.
+// Si aquí también llamamos a showNotification, se duplica la notificación.
 messaging.onBackgroundMessage((payload) => {
-  console.log('[sw.js] Notificación en segundo plano:', payload);
-  
-  const notificationTitle = payload.notification?.title || 'Jennyfit Admin';
-  const notificationOptions = {
-    body: payload.notification?.body || 'Tienes una nueva alerta.',
-    icon: 'icono-admin-192.png',
-    vibrate: [300, 100, 300, 100, 400]
-  };
-
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  console.log('[sw.js admin] Notificación recibida en segundo plano:', payload);
 });
 
 self.addEventListener('notificationclick', function(event) {
