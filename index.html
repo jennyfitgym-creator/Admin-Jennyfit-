@@ -30,22 +30,11 @@
         body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: var(--text); padding-bottom: 85px; transition: background 0.3s, color 0.3s; }
         
         /* PANTALLA DE BLOQUEO ADMIN */
-        #admin-lock-screen {
-            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: var(--bg); z-index: 20000; flex-direction: column;
-            justify-content: center; align-items: center; padding: 20px; text-align: center;
-        }
-        .lock-box {
-            background: var(--card); border: 1px solid var(--primary); border-radius: 24px;
-            padding: 30px 20px; width: 100%; max-width: 340px; box-shadow: 0 10px 40px rgba(57,255,20,0.1);
-        }
+        #admin-lock-screen { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg); z-index: 20000; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; }
+        .lock-box { background: var(--card); border: 1px solid var(--primary); border-radius: 24px; padding: 30px 20px; width: 100%; max-width: 340px; box-shadow: 0 10px 40px rgba(57,255,20,0.1); }
         .lock-box h2 { margin: 0 0 10px 0; color: var(--primary); font-size: 1.4rem; font-weight: 900; }
         .lock-box p { font-size: 0.85rem; color: var(--muted); margin-bottom: 20px; }
-        .pin-input {
-            width: 100%; padding: 15px; background: var(--bg); border: 2px solid var(--border);
-            border-radius: 12px; color: var(--text); font-size: 1.5rem; font-weight: 900;
-            text-align: center; letter-spacing: 8px; margin-bottom: 15px; outline: none;
-        }
+        .pin-input { width: 100%; padding: 15px; background: var(--bg); border: 2px solid var(--border); border-radius: 12px; color: var(--text); font-size: 1.5rem; font-weight: 900; text-align: center; letter-spacing: 8px; margin-bottom: 15px; outline: none; }
         .pin-input:focus { border-color: var(--primary); }
         .btn-unlock { width: 100%; padding: 15px; background: var(--primary); color: #051405; border: none; border-radius: 12px; font-weight: 900; font-size: 1rem; cursor: pointer; margin-bottom: 15px; }
         .btn-forgot { background: transparent; border: none; color: var(--muted); font-weight: 700; font-size: 0.8rem; cursor: pointer; text-decoration: underline; }
@@ -64,8 +53,8 @@
         /* HEADER */
         .header-admin { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
         .header-left { display: flex; flex-direction: column; gap: 4px; }
-        .logo-img-container { display: flex; align-items: center; cursor: pointer; gap: 8px; }
-        #admin-logo-img { max-height: 45px; max-width: 180px; object-fit: contain; display: none; }
+        .logo-img-container { display: flex; align-items: center; cursor: pointer; gap: 8px; background: var(--card-sub); padding: 5px 10px; border-radius: 12px; border: 1px dashed var(--border); }
+        #admin-logo-img { max-height: 45px; max-width: 180px; object-fit: contain; display: none; border-radius: 4px;}
         .logo-text-small { color: var(--primary); font-weight: 900; font-size: 1.5rem; letter-spacing: -0.5px; }
         .admin-email { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
 
@@ -117,7 +106,6 @@
         .btn-delete-user { background: rgba(255, 42, 42, 0.1); color: var(--danger); }
         .btn-block { background: rgba(255, 42, 42, 0.05); border: 1px solid var(--danger); color: var(--danger); }
         
-        /* NUEVOS BOTONES: WHATSAPP, +1 MES, VER ENTRENOS */
         .btn-whatsapp { background: rgba(37, 211, 102, 0.1); color: #25D366; border: 1px solid #25D366; }
         .btn-1mes { background: rgba(57, 255, 20, 0.1); color: var(--primary); border: 1px solid var(--primary); }
         .btn-ver-entrenos { background: rgba(57, 255, 20, 0.1); color: var(--primary); border: 1px solid var(--primary); }
@@ -140,7 +128,7 @@
         .settings-value.active { color: var(--gold); }
         .settings-value.danger { color: var(--danger); }
 
-        #modal-fecha, #modal-confirm, #modal-pin, #modal-ver-entrenos { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 10000; justify-content: center; align-items: center; }
+        #modal-fecha, #modal-confirm, #modal-pin, #modal-ver-entrenos, #modal-input-padrino, #modal-logo { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 10000; justify-content: center; align-items: center; }
         .modal-box { background: var(--card); padding: 25px; border-radius: 24px; border: 1px solid var(--border); width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .modal-box h3 { margin-top: 0; color: var(--text); font-size: 1.2rem; margin-bottom: 15px; }
         .modal-box input { width: 100%; padding: 12px; margin: 10px 0 20px; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 12px; font-family: inherit; outline: none;}
@@ -151,6 +139,15 @@
         .slide-item img { width: 60px; height: 40px; object-fit: cover; border-radius: 8px; }
         .slide-item-info { flex: 1; font-size: 0.8rem; font-weight: 600; }
         .btn-delete { background: rgba(255, 42, 42, 0.1); border: none; color: var(--danger); padding: 8px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        /* HISTORIAL POP-UP */
+        .popup-history-item { background: var(--card-sub); border: 1px solid var(--border); border-radius: 12px; padding: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .popup-history-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; }
+        .popup-history-info { flex: 1; font-size: 0.75rem; }
+        .popup-history-actions { display: flex; gap: 4px; flex-direction: column; }
+        .btn-history-action { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 4px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: 800; cursor: pointer; }
+        .btn-history-action.publish { color: var(--primary); border-color: var(--primary); }
+        .btn-history-action.delete { color: var(--danger); border-color: var(--danger); }
 
         .loading-text { text-align: center; color: var(--primary); font-weight: bold; margin-top: 20px; display: none; }
         .empty-state { text-align: center; color: var(--muted); font-size: 0.9rem; padding: 30px 20px; background: var(--card-sub); border-radius: 20px; font-weight: 600; }
@@ -188,8 +185,8 @@
         <!-- HEADER -->
         <div class="header-admin">
             <div class="header-left">
-                <div class="logo-img-container" onclick="document.getElementById('logo-upload').click()">
-                    <input type="file" id="logo-upload" accept="image/*" style="display:none;" onchange="subirLogoAdmin(event)">
+                <div class="logo-img-container" onclick="abrirModalLogo()">
+                    <span style="font-size:1.2rem;">📷</span>
                     <img id="admin-logo-img" src="" alt="Logo">
                     <div class="logo-text-small" id="admin-logo-text">JENNYFIT ADMIN</div>
                 </div>
@@ -259,7 +256,7 @@
             <div id="carrusel-lista"></div>
         </div>
 
-        <!-- 🚨 NUEVA PESTAÑA: POP-UP PROMOCIONAL 🚨 -->
+        <!-- 🚨 PESTAÑA: POP-UP PROMOCIONAL 🚨 -->
         <div id="tab-popup" class="tab-panel">
             <div class="section-title">Pop-up Promocional</div>
             <div class="form-box">
@@ -269,7 +266,7 @@
                 </div>
                 <div class="form-group">
                     <label>Enlace de destino al tocar la imagen (Opcional):</label>
-                    <input type="url" id="popup-target-url" placeholder="https://www.instagram.com/jennyfit.ve/">
+                    <input type="url" id="popup-target-url" placeholder="https://www.instagram.com/...">
                 </div>
                 <div class="form-group" style="display:flex; align-items:center; gap:10px; background:var(--bg); padding:12px; border-radius:12px; border:1px solid var(--border);">
                     <input type="checkbox" id="popup-active-toggle" style="width:22px; height:22px; accent-color:var(--primary);">
@@ -279,10 +276,13 @@
             </div>
 
             <div class="section-title" style="margin-top: 20px; font-size: 1rem;">Vista Previa</div>
-            <div style="text-align:center; background:var(--card-sub); padding:20px; border-radius:20px; border:1px dashed var(--border);">
-                <img id="popup-preview-img" src="" style="max-width: 100%; max-height: 300px; border-radius:15px; display:none; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+            <div style="text-align:center; background:var(--card-sub); padding:20px; border-radius:20px; border:1px dashed var(--border); margin-bottom:20px;">
+                <img id="popup-preview-img" src="" style="max-width: 100%; max-height: 250px; border-radius:15px; display:none; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
                 <div id="popup-preview-empty" style="color:var(--muted); font-size:0.9rem; font-weight:700;">Sin imagen configurada</div>
             </div>
+
+            <div class="section-title" style="margin-top: 20px; font-size: 1rem;">Historial de Pop-ups</div>
+            <div id="popup-history-list"></div>
         </div>
 
         <!-- PESTAÑA: AJUSTES -->
@@ -347,7 +347,6 @@
             <span class="icon">🖼️</span>
             <span>Carrusel</span>
         </button>
-        <!-- NUEVO BOTÓN AQUÍ -->
         <button class="nav-item" onclick="cambiarTabAdmin('popup', event)">
             <span class="icon">🚀</span>
             <span>Pop-up</span>
@@ -358,7 +357,7 @@
         </button>
     </div>
 
-    <!-- MODAL PARA EDITAR FECHA -->
+    <!-- MODALES -->
     <div id="modal-fecha">
         <div class="modal-box">
             <h3>📅 Editar Membresía</h3>
@@ -369,7 +368,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONFIRMACIÓN -->
     <div id="modal-confirm">
         <div class="modal-box">
             <h3 id="confirm-title">¿Estás seguro?</h3>
@@ -379,7 +377,6 @@
         </div>
     </div>
 
-    <!-- MODAL PARA CREAR PIN -->
     <div id="modal-pin">
         <div class="modal-box">
             <h3>🔐 Configurar PIN de Seguridad</h3>
@@ -390,7 +387,6 @@
         </div>
     </div>
 
-    <!-- MODAL PARA VER ENTRENOS -->
     <div id="modal-ver-entrenos">
         <div class="modal-box" style="text-align: left; max-width: 440px;">
             <h3 id="ver-entrenos-title" style="color: var(--primary); margin-bottom: 10px;">Historial de Entrenos</h3>
@@ -399,11 +395,40 @@
         </div>
     </div>
 
+    <!-- 🚨 NUEVO MODAL PARA ASIGNAR PADRINO 🚨 -->
+    <div id="modal-input-padrino">
+        <div class="modal-box">
+            <h3>🔗 Asignar Padrino</h3>
+            <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 15px;">Ingresa el código de invitación del padrino (Ej: EDWARD-6282).</p>
+            <input type="text" id="padrino-codigo-input" placeholder="CÓDIGO" style="text-transform:uppercase; text-align:center; font-weight:900; letter-spacing:2px;">
+            <button class="btn-save-date" onclick="confirmarAsignarPadrino()">💾 Vincular Padrino</button>
+            <button class="btn-cancel" onclick="cerrarModalPadrino()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- 🚨 NUEVO MODAL PARA EL LOGO 🚨 -->
+    <div id="modal-logo">
+        <div class="modal-box">
+            <h3>📷 Cambiar Logo del Panel</h3>
+            <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 15px;">Puedes pegar el enlace (URL) de tu logotipo o subirlo desde tu teléfono.</p>
+            <input type="file" id="logo-file-upload" accept="image/*" style="display:none;" onchange="subirLogoDesdeTelefono(event)">
+            <button class="btn-save-date" style="background:var(--card-sub); color:var(--text); border:1px solid var(--primary);" onclick="document.getElementById('logo-file-upload').click()">📂 Subir desde el Teléfono</button>
+            
+            <div style="margin-top:15px; text-align:left;">
+                <label style="font-size:0.8rem; color:var(--muted); font-weight:700;">O pega un enlace URL:</label>
+                <input type="url" id="logo-url-input" placeholder="https://ejemplo.com/logo.png">
+                <button class="btn-save-date" onclick="guardarLogoDesdeUrl()">Guardar desde URL</button>
+            </div>
+            
+            <button class="btn-cancel" style="margin-top:10px;" onclick="cerrarModalLogo()">Cerrar</button>
+        </div>
+    </div>
+
     <!-- SCRIPTS DE FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-        import { getFirestore, collection, doc, updateDoc, getDoc, setDoc, onSnapshot, deleteDoc, query, where, getDocs, increment, deleteField } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+        import { getFirestore, collection, doc, updateDoc, getDoc, setDoc, onSnapshot, deleteDoc, query, where, getDocs, increment, deleteField, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
         import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging.js";
 
         const firebaseConfig = {
@@ -434,6 +459,10 @@
         let carruselItems = [];
         let unsubscribeClientes = null;
         let accionPendienteConfirm = null;
+        
+        // Variables para Padrinos
+        let uidClienteAsignandoPadrino = null;
+        let nombreClienteAsignandoPadrino = null;
 
         const loginScreen = document.getElementById('login-screen');
         const dashboard = document.getElementById('dashboard');
@@ -534,7 +563,16 @@
         aplicarTema();
         actualizarEstadoPinUI();
 
-        // 🚨 LOGOTIPO PERSONALIZADO 🚨
+        // 🚨 LOGOTIPO PERSONALIZADO (MEJORADO) 🚨
+        window.abrirModalLogo = function() {
+            document.getElementById('logo-url-input').value = '';
+            document.getElementById('modal-logo').style.display = 'flex';
+        };
+
+        window.cerrarModalLogo = function() {
+            document.getElementById('modal-logo').style.display = 'none';
+        };
+
         function cargarLogoGuardado() {
             const logoB64 = localStorage.getItem('jennyfit_admin_logo');
             const img = document.getElementById('admin-logo-img');
@@ -547,15 +585,24 @@
         }
         cargarLogoGuardado();
 
-        window.subirLogoAdmin = function(event) {
+        window.subirLogoDesdeTelefono = function(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 localStorage.setItem('jennyfit_admin_logo', e.target.result);
                 cargarLogoGuardado();
+                cerrarModalLogo();
             };
             reader.readAsDataURL(file);
+        };
+
+        window.guardarLogoDesdeUrl = function() {
+            const url = document.getElementById('logo-url-input').value.trim();
+            if (!url) { alert("Pega un enlace válido."); return; }
+            localStorage.setItem('jennyfit_admin_logo', url);
+            cargarLogoGuardado();
+            cerrarModalLogo();
         };
 
         // 🚨 NOTIFICACIONES PUSH ADMIN 🚨
@@ -804,7 +851,7 @@
                     refHtml = `<div class="ref-info-box" style="flex-direction: column; align-items: flex-start; gap: 8px; border-color: var(--muted); background: transparent;">
                         <span style="color: var(--muted);">Sin padrino asignado</span>
                         <div style="display: flex; gap: 5px; width: 100%;">
-                            <button class="btn-validar-ref" style="flex: 1; margin-bottom: 0; background: var(--card-sub); color: var(--text); border: 1px solid var(--border);" onclick="asignarPadrinoManual('${cliente.uid}', '${cliente.nombre}')">🔗 Asignar Padrino</button>
+                            <button class="btn-validar-ref" style="flex: 1; margin-bottom: 0; background: var(--card-sub); color: var(--text); border: 1px solid var(--border);" onclick="abrirModalPadrino('${cliente.uid}', '${cliente.nombre}')">🔗 Asignar Padrino</button>
                         </div>
                     </div>`;
                 }
@@ -955,35 +1002,53 @@
             window.open(`https://wa.me/${numLimpio}?text=${encodeURIComponent(mensaje)}`, '_blank');
         };
 
-        // 🚨 NUEVA FUNCIÓN: ASIGNAR PADRINO MANUALMENTE 🚨
-        window.asignarPadrinoManual = async function(uidReferido, nombreReferido) {
-            const codigoPadrino = prompt(`Ingresa el código de invitación del padrino para ${nombreReferido} (Ej: EDWARD-6282):`);
-            if (!codigoPadrino) return;
+        // 🚨 NUEVA FUNCIÓN: ABRIR MODAL DE ASIGNAR PADRINO 🚨
+        window.abrirModalPadrino = function(uid, nombre) {
+            uidClienteAsignandoPadrino = uid;
+            nombreClienteAsignandoPadrino = nombre;
+            document.getElementById('padrino-codigo-input').value = '';
+            document.getElementById('modal-input-padrino').style.display = 'flex';
+            setTimeout(() => document.getElementById('padrino-codigo-input').focus(), 100);
+        };
+
+        window.cerrarModalPadrino = function() {
+            document.getElementById('modal-input-padrino').style.display = 'none';
+            uidClienteAsignandoPadrino = null;
+            nombreClienteAsignandoPadrino = null;
+        };
+
+        window.confirmarAsignarPadrino = async function() {
+            const codigoPadrino = document.getElementById('padrino-codigo-input').value.trim().toUpperCase();
+            if (!codigoPadrino) { alert("Por favor, ingresa el código."); return; }
             
-            const codLimpio = codigoPadrino.trim().toUpperCase();
-            
+            const btn = document.querySelector('#modal-input-padrino .btn-save-date');
+            const txtOriginal = btn.innerText;
+            btn.innerText = "⏳ Buscando...";
+
             try {
-                const q = query(collection(db, "usuarios"), where("jennyfit_mi_codigo", "==", codLimpio));
+                const q = query(collection(db, "usuarios"), where("jennyfit_mi_codigo", "==", codigoPadrino));
                 const querySnapshot = await getDocs(q);
                 
                 if (!querySnapshot.empty) {
                     const referenteDoc = querySnapshot.docs[0];
                     const nombrePadrino = referenteDoc.data().jennyfit_username;
                     
-                    if (confirm(`¿Vincular a ${nombreReferido} con el padrino ${nombrePadrino} (${codLimpio})?\n\nEl pago quedará en estado Pendiente (Amarillo) hasta que tú lo valides.`)) {
-                        await updateDoc(doc(db, "usuarios", uidReferido), {
-                            jennyfit_referido_por: codLimpio,
-                            jennyfit_uid_referente: referenteDoc.id,
-                            jennyfit_referido_pagado: false 
-                        });
-                        alert("✅ Vínculo asignado correctamente. Ahora aparecerá en amarillo para que puedas validarlo.");
-                    }
+                    await updateDoc(doc(db, "usuarios", uidClienteAsignandoPadrino), {
+                        jennyfit_referido_por: codigoPadrino,
+                        jennyfit_uid_referente: referenteDoc.id,
+                        jennyfit_referido_pagado: false 
+                    });
+                    
+                    alert(`✅ Se vinculó a ${nombreClienteAsignandoPadrino} con el padrino ${nombrePadrino}.\nEl pago quedará pendiente (amarillo).`);
+                    cerrarModalPadrino();
                 } else {
                     alert("❌ No se encontró ningún cliente con ese código de invitación. Verifica que esté bien escrito.");
                 }
             } catch (error) {
                 console.error(error);
                 alert("Error al asignar padrino: " + error.message);
+            } finally {
+                btn.innerText = txtOriginal;
             }
         };
 
@@ -1035,8 +1100,11 @@
 
         window.bloquearCliente = function(uid, nombre) {
             abrirModalConfirm("Bloquear Cliente", `¿Bloquear a ${nombre}? Se le pedirá pago para volver a entrar.`, async () => {
-                try { await updateDoc(doc(db, "usuarios", uid), { jennyfit_membership_expiry: "0" }); } 
-                catch (error) { alert("Error: " + error.message); }
+                try { 
+                    await updateDoc(doc(db, "usuarios", uid), { jennyfit_membership_expiry: "0" }); 
+                    alert(`✅ Cliente ${nombre} bloqueado correctamente.`);
+                } 
+                catch (error) { alert("Error al bloquear: " + error.message); }
             });
         };
 
@@ -1221,7 +1289,7 @@
             renderizarCarruselAdmin();
         };
 
-        // --- 🚨 MÓDULO POP-UP PROMOCIONAL 🚨 ---
+        // --- 🚨 MÓDULO POP-UP PROMOCIONAL (CON HISTORIAL) 🚨 ---
         window.cargarPopupAdmin = async function() {
             try {
                 const docSnap = await getDoc(doc(db, "configuracion", "popup"));
@@ -1231,11 +1299,13 @@
                     document.getElementById('popup-target-url').value = data.targetUrl || '';
                     document.getElementById('popup-active-toggle').checked = data.active === true;
                     actualizarVistaPreviaPopup(data.imageUrl);
+                    renderizarHistorialPopups(data.history || []);
                 } else {
                     document.getElementById('popup-image-url').value = '';
                     document.getElementById('popup-target-url').value = '';
                     document.getElementById('popup-active-toggle').checked = false;
                     actualizarVistaPreviaPopup('');
+                    renderizarHistorialPopups([]);
                 }
             } catch(e) { console.error("Error cargando popup", e); }
         };
@@ -1261,9 +1331,88 @@
             if (active && !imageUrl) { alert("⚠️ Si activas el pop-up, debes poner una URL de imagen."); return; }
 
             try {
-                await setDoc(doc(db, "configuracion", "popup"), { imageUrl, targetUrl, active });
+                const docRef = doc(db, "configuracion", "popup");
+                const docSnap = await getDoc(docRef);
+                let history = [];
+                
+                // Si ya existía una imagen diferente, la guardamos en el historial
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.imageUrl && data.imageUrl !== imageUrl) {
+                        history = data.history || [];
+                        history.unshift({
+                            id: Date.now(),
+                            imageUrl: data.imageUrl,
+                            targetUrl: data.targetUrl || '',
+                            date: new Date().toLocaleDateString('es-VE')
+                        });
+                    } else {
+                        history = data.history || [];
+                    }
+                }
+
+                await setDoc(docRef, { imageUrl, targetUrl, active, history });
                 alert("✅ Pop-up guardado y publicado correctamente.");
+                cargarPopupAdmin();
             } catch(e) { alert("❌ Error al guardar: " + e.message); }
+        };
+
+        window.renderizarHistorialPopups = function(history) {
+            const cont = document.getElementById('popup-history-list');
+            if (!history || history.length === 0) {
+                cont.innerHTML = '<div class="empty-state">No hay promociones archivadas aún.</div>';
+                return;
+            }
+            cont.innerHTML = '';
+            history.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'popup-history-item';
+                div.innerHTML = `
+                    <img src="${item.imageUrl}" alt="Thumb">
+                    <div class="popup-history-info">
+                        <b>Guardada el:</b> ${item.date}<br>
+                        <span style="color:var(--muted); font-size:0.65rem;">${item.imageUrl.substring(0,25)}...</span>
+                    </div>
+                    <div class="popup-history-actions">
+                        <button class="btn-history-action publish" onclick="republicarPopup(${item.id})">🔄 Republicar</button>
+                        <button class="btn-history-action delete" onclick="borrarPopupHistorial(${item.id})">🗑️ Borrar</button>
+                    </div>
+                `;
+                cont.appendChild(div);
+            });
+        };
+
+        window.republicarPopup = async function(id) {
+            try {
+                const docRef = doc(db, "configuracion", "popup");
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const item = (data.history || []).find(h => h.id === id);
+                    if (item) {
+                        document.getElementById('popup-image-url').value = item.imageUrl;
+                        document.getElementById('popup-target-url').value = item.targetUrl;
+                        document.getElementById('popup-active-toggle').checked = true;
+                        actualizarVistaPreviaPopup(item.imageUrl);
+                        alert("✅ Promoción cargada en el formulario. Revisa la vista previa y toca 'Guardar' para publicarla.");
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                }
+            } catch(e) { alert("Error al republicar: " + e.message); }
+        };
+
+        window.borrarPopupHistorial = async function(id) {
+            if (!confirm("¿Borrar esta promoción del historial permanentemente?")) return;
+            try {
+                const docRef = doc(db, "configuracion", "popup");
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const newHistory = (data.history || []).filter(h => h.id !== id);
+                    await updateDoc(docRef, { history: newHistory });
+                    cargarPopupAdmin();
+                }
+            } catch(e) { alert("Error al borrar: " + e.message); }
         };
 
         // --- OBSERVADOR DE SESIÓN ---
