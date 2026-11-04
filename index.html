@@ -106,6 +106,9 @@
         .btn-delete-user { background: rgba(255, 42, 42, 0.1); color: var(--danger); }
         .btn-block { background: rgba(255, 42, 42, 0.05); border: 1px solid var(--danger); color: var(--danger); }
         
+        /* NUEVO BOTÓN DESBLOQUEAR */
+        .btn-unblock { background: rgba(57, 255, 20, 0.1); border: 1px solid var(--primary); color: var(--primary); }
+
         .btn-whatsapp { background: rgba(37, 211, 102, 0.1); color: #25D366; border: 1px solid #25D366; }
         .btn-1mes { background: rgba(57, 255, 20, 0.1); color: var(--primary); border: 1px solid var(--primary); }
         .btn-ver-entrenos { background: rgba(57, 255, 20, 0.1); color: var(--primary); border: 1px solid var(--primary); }
@@ -186,7 +189,6 @@
         <div class="header-admin">
             <div class="header-left">
                 <div class="logo-img-container" onclick="abrirModalLogo()">
-                    <!-- 🚨 CÁMARA ELIMINADA 🚨 -->
                     <img id="admin-logo-img" src="" alt="Logo">
                     <div class="logo-text-small" id="admin-logo-text">JENNYFIT ADMIN</div>
                 </div>
@@ -336,7 +338,7 @@
         </div>
     </div>
 
-    <!-- 🚨 BARRA DE NAVEGACIÓN INFERIOR CON SVG MINIMALISTAS 🚨 -->
+    <!-- BARRA DE NAVEGACIÓN INFERIOR CON SVG MINIMALISTAS -->
     <div class="bottom-nav">
         <button class="nav-item active" onclick="cambiarTabAdmin('clientes', event)">
             <svg class="nav-svg" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
@@ -429,7 +431,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-        import { getFirestore, collection, doc, updateDoc, getDoc, setDoc, onSnapshot, deleteDoc, query, where, getDocs, increment, deleteField, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+        import { getFirestore, collection, doc, updateDoc, getDoc, setDoc, onSnapshot, deleteDoc, query, where, getDocs, increment, deleteField } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
         import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging.js";
 
         const firebaseConfig = {
@@ -798,7 +800,7 @@
             filtrarYRenderizar();
         };
 
-        // 🚨 RENDERIZADO DE TARJETAS CON EL BOTÓN DE VER ENTRENOS 🚨
+        // 🚨 RENDERIZADO DE TARJETAS CON BOTÓN DINÁMICO BLOQUEAR/DESBLOQUEAR 🚨
         window.filtrarYRenderizar = function() {
             const textoBusqueda = document.getElementById('search-client').value.toLowerCase().trim();
             const ahora = Date.now();
@@ -867,6 +869,11 @@
                 const card = document.createElement('div');
                 card.className = `client-card ${claseCard}`;
                 
+                // 🚨 LÓGICA PARA CAMBIAR EL BOTÓN DE BLOQUEAR A DESBLOQUEAR 🚨
+                const botonBloqueo = activo 
+                    ? `<button class="btn-card btn-block" onclick="bloquearCliente('${cliente.uid}', '${cliente.nombre}')">⛔ Bloquear</button>`
+                    : `<button class="btn-card btn-unblock" onclick="abrirModalFecha('${cliente.uid}', '${cliente.nombre}', ${cliente.expiraMs})">🔓 Desbloquear</button>`;
+
                 card.innerHTML = `
                     <div class="client-header">
                         <div class="client-name">${cliente.nombre}</div>
@@ -875,7 +882,7 @@
                     <div class="client-info">
                         <span>📧 ${cliente.email}</span>
                         <span>🪪 ${cliente.cedula} | 📲 ${cliente.telefono}</span>
-                        <span>📅 Vence: ${cliente.expiraMs > 0 ? new Date(cliente.expiraMs).toLocaleDateString('es-VE') : 'Sin activar'}</span>
+                        <span>📅 Vence: ${cliente.expiraMs > 0 ? new Date(cliente.expiraMs).toLocaleDateString('es-VE') : 'Sin activar / Bloqueado'}</span>
                     </div>
                     ${refHtml}
                     <div class="card-actions" style="grid-template-columns: 1fr 1fr;">
@@ -886,7 +893,9 @@
                         
                         <button class="btn-card btn-whatsapp" onclick="enviarWhatsAppCliente('${cliente.nombre}', '${cliente.telefono}', ${cliente.expiraMs})">📲 WhatsApp</button>
                         <button class="btn-card btn-history" onclick="borrarHistorialCliente('${cliente.uid}', '${cliente.nombre}')">🧹 Historial</button>
-                        <button class="btn-card btn-block" onclick="bloquearCliente('${cliente.uid}', '${cliente.nombre}')">⛔ Bloquear</button>
+                        
+                        ${botonBloqueo}
+                        
                         <button class="btn-card btn-delete-user" onclick="eliminarCliente('${cliente.uid}', '${cliente.nombre}')">🗑️ Eliminar</button>
                     </div>`;
                 clientsContainer.appendChild(card);
@@ -991,7 +1000,7 @@
                 numLimpio = '58' + numLimpio.substring(1);
             }
 
-            let txtFecha = "Sin activar";
+            let txtFecha = "Sin activar / Bloqueado";
             if (expiraMs > 0) {
                 const d = new Date(expiraMs);
                 txtFecha = d.toLocaleDateString('es-VE');
