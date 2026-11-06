@@ -1017,8 +1017,9 @@
                 card.className = `client-card ${claseCard}`;
                 
                 // 🚨 LÓGICA PARA CAMBIAR EL BOTÓN DE BLOQUEAR A DESBLOQUEAR 🚨
+                // MODIFICADO: Se pasa solo el UID para evitar errores con nombres que tienen comillas
                 const botonBloqueo = activo 
-                    ? `<button class="btn-card btn-block" onclick="bloquearCliente('${cliente.uid}', '${cliente.nombre}')">⛔ Bloquear</button>`
+                    ? `<button class="btn-card btn-block" onclick="bloquearCliente('${cliente.uid}')">⛔ Bloquear</button>`
                     : `<button class="btn-card btn-unblock" onclick="abrirModalFecha('${cliente.uid}', '${cliente.nombre}', ${cliente.expiraMs})">🔓 Desbloquear</button>`;
 
                 card.innerHTML = `
@@ -1043,7 +1044,7 @@
                         
                         ${botonBloqueo}
                         
-                        <button class="btn-card btn-delete-user" onclick="eliminarCliente('${cliente.uid}', '${cliente.nombre}')">🗑️ Eliminar</button>
+                        <button class="btn-card btn-delete-user" onclick="eliminarCliente('${cliente.uid}')">🗑️ Eliminar</button>
                     </div>`;
                 clientsContainer.appendChild(card);
             });
@@ -1232,35 +1233,37 @@
             document.getElementById('modal-confirm').style.display = 'flex';
         };
         window.cerrarModalConfirm = function() { document.getElementById('modal-confirm').style.display = 'none'; accionPendienteConfirm = null; };
-        document.getElementById('btn-confirm-yes').onclick = () => { if(accionPendienteConfirm) accionPendienteConfirm(); cerrarModalConfirm(); };
+        
+        // 🚨 FIX: Usar un listener seguro para el botón confirmar
+        document.getElementById('btn-confirm-yes').addEventListener('click', () => { 
+            if(accionPendienteConfirm) accionPendienteConfirm(); 
+            cerrarModalConfirm(); 
+        });
 
-        // ACCIONES DE CLIENTES
-        window.abrirModalFecha = function(uid, nombre, expiraMs) {
-            clienteEditandoUID = uid;
-            document.getElementById('modal-cliente-nombre').innerText = nombre;
-            let fechaInicial = expiraMs > 0 ? new Date(expiraMs) : new Date();
-            fechaInicial.setMinutes(fechaInicial.getMinutes() - fechaInicial.getTimezoneOffset());
-            document.getElementById('input-fecha-expiracion').value = fechaInicial.toISOString().slice(0,16);
-            document.getElementById('modal-fecha').style.display = 'flex';
-        };
-        window.cerrarModalFecha = function() { document.getElementById('modal-fecha').style.display = 'none'; clienteEditandoUID = null; };
-
-        window.guardarNuevaFecha = async function() {
-            if (!clienteEditandoUID) return;
-            const nuevaFechaMs = new Date(document.getElementById('input-fecha-expiracion').value).getTime();
-            try {
-                await updateDoc(doc(db, "usuarios", clienteEditandoUID), { jennyfit_membership_expiry: String(nuevaFechaMs) });
-                alert("✅ Fecha actualizada."); cerrarModalFecha(); 
-            } catch (error) { alert("Error: " + error.message); }
-        };
-
-        window.bloquearCliente = function(uid, nombre) {
+        // ACCIONES DE CLIENTES (MODIFICADAS PARA BUSCAR NOMBRE POR UID)
+        window.bloquearCliente = function(uid) {
+            const cliente = clientesArrayGlobal.find(c => c.uid === uid);
+            const nombre = cliente ? cliente.nombre : 'el cliente';
+            
             abrirModalConfirm("Bloquear Cliente", `¿Bloquear a ${nombre}? Se le pedirá pago para volver a entrar.`, async () => {
                 try { 
                     await updateDoc(doc(db, "usuarios", uid), { jennyfit_membership_expiry: "0" }); 
                     alert(`✅ Cliente ${nombre} bloqueado correctamente.`);
                 } 
                 catch (error) { alert("Error al bloquear: " + error.message); }
+            });
+        };
+
+        window.eliminarCliente = function(uid) {
+            const cliente = clientesArrayGlobal.find(c => c.uid === uid);
+            const nombre = cliente ? cliente.nombre : 'el cliente';
+
+            abrirModalConfirm("Eliminar Cliente", `⚠️ ¿Eliminar definitivamente a ${nombre}? Si vuelve a entrar, tendrá que registrarse de nuevo.`, async () => {
+                try {
+                    await deleteDoc(doc(db, "usuarios", uid));
+                    clientesConocidosUIDs.delete(uid);
+                    localStorage.setItem('jennyfit_admin_known_uids', JSON.stringify(Array.from(clientesConocidosUIDs)));
+                } catch (error) { alert("Error al eliminar: " + error.message); }
             });
         };
 
@@ -1278,14 +1281,23 @@
             });
         };
 
-        window.eliminarCliente = function(uid, nombre) {
-            abrirModalConfirm("Eliminar Cliente", `⚠️ ¿Eliminar definitivamente a ${nombre}? Si vuelve a entrar, tendrá que registrarse de nuevo.`, async () => {
-                try {
-                    await deleteDoc(doc(db, "usuarios", uid));
-                    clientesConocidosUIDs.delete(uid);
-                    localStorage.setItem('jennyfit_admin_known_uids', JSON.stringify(Array.from(clientesConocidosUIDs)));
-                } catch (error) { alert("Error al eliminar: " + error.message); }
-            });
+        window.abrirModalFecha = function(uid, nombre, expiraMs) {
+            clienteEditandoUID = uid;
+            document.getElementById('modal-cliente-nombre').innerText = nombre;
+            let fechaInicial = expiraMs > 0 ? new Date(expiraMs) : new Date();
+            fechaInicial.setMinutes(fechaInicial.getMinutes() - fechaInicial.getTimezoneOffset());
+            document.getElementById('input-fecha-expiracion').value = fechaInicial.toISOString().slice(0,16);
+            document.getElementById('modal-fecha').style.display = 'flex';
+        };
+        window.cerrarModalFecha = function() { document.getElementById('modal-fecha').style.display = 'none'; clienteEditandoUID = null; };
+
+        window.guardarNuevaFecha = async function() {
+            if (!clienteEditandoUID) return;
+            const nuevaFechaMs = new Date(document.getElementById('input-fecha-expiracion').value).getTime();
+            try {
+                await updateDoc(doc(db, "usuarios", clienteEditandoUID), { jennyfit_membership_expiry: String(nuevaFechaMs) });
+                alert("✅ Fecha actualizada."); cerrarModalFecha(); 
+            } catch (error) { alert("Error: " + error.message); }
         };
 
         // 🚨 FUNCIÓN: ELIMINAR REFERIDO CON AJUSTE AUTOMÁTICO DE SALDO 🚨
