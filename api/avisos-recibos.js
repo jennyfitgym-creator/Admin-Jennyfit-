@@ -1,47 +1,38 @@
 import admin from 'firebase-admin';
 
-// Inicializar Firebase Admin
-if (!admin.apps.length) {
-    try {
-        let serviceAccount;
-        if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-            serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-        }
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount)
-        });
-    } catch (error) {
-        console.error('Error inicializando Firebase Admin:', error);
-    }
-}
-
 export default async function handler(req, res) {
-    // Vercel Cron envía un GET. También permitimos POST por si queremos probarlo manualmente.
-    if (req.method !== 'GET' && req.method !== 'POST') {
-        return res.status(405).json({ error: 'Método no permitido' });
-    }
-
     try {
+        // 1. Inicializar Firebase Admin con la llave secreta guardada en Vercel
+        if (!admin.apps.length) {
+            if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
+                return res.status(500).json({ success: false, error: 'Falta configurar FIREBASE_SERVICE_ACCOUNT en Vercel' });
+            }
+            const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount)
+            });
+        }
+
         const db = admin.firestore();
         
-        // 1. Obtener el Token del Admin
+        // 2. Obtener el Token del Administrador (tu teléfono)
         const adminDoc = await db.collection('configuracion').doc('admin_push').get();
         if (!adminDoc.exists || !adminDoc.data().token) {
-            return res.status(400).json({ success: false, error: 'No hay token de admin configurado.' });
+            return res.status(400).json({ success: false, error: 'No hay token de admin configurado en la nube.' });
         }
         const tokenAdmin = adminDoc.data().token;
 
-        // 2. Obtener la Configuración de los días de aviso
+        // 3. Obtener la Configuración de los días (2 días, 1 día, hoy)
         const configDoc = await db.collection('configuracion').doc('recibos_config').get();
         let diasAviso = [2, 1, 0]; // Por defecto
         if (configDoc.exists && configDoc.data().avisoDias) {
             diasAviso = configDoc.data().avisoDias;
         }
 
-        // 3. Obtener los Recibos
+        // 4. Obtener la lista de Recibos guardados en la nube
         const recibosDoc = await db.collection('configuracion').doc('recibos_admin').get();
         if (!recibosDoc.exists || !recibosDoc.data().recibos) {
-            return res.status(200).json({ success: true, message: 'No hay recibos para revisar.' });
+            return res.status(200).json({ success: true, message: 'No hay recibos guardados para revisar.' });
         }
         const recibos = recibosDoc.data().recibos;
 
@@ -49,7 +40,7 @@ export default async function handler(req, res) {
         hoy.setHours(0,0,0,0);
         let notificacionesEnviadas = 0;
 
-        // 4. Revisar cada recibo
+        // 5. Revisar recibo por recibo
         for (const recibo of recibos) {
             // Ignorar si ya está pagado
             const abonado = (recibo.abonos || []).reduce((a, b) => a + (Number(b.monto) || 0), 0);
@@ -58,6 +49,7 @@ export default async function handler(req, res) {
 
             if (!recibo.fechaVencimiento) continue;
 
+            // Calcular cuántos días faltan para que venza
             const [y, m, d] = recibo.fechaVencimiento.split('-').map(Number);
             const fechaVenc = new Date(y, m-1, d);
             fechaVenc.setHours(0,0,0,0);
@@ -65,7 +57,7 @@ export default async function handler(req, res) {
             const diffTime = fechaVenc - hoy;
             const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
-            // Si el día de hoy coincide con los días de aviso configurados
+            // Si coincide con los días de aviso que configuraste
             if (diasAviso.includes(diffDays)) {
                 let textDays = '';
                 if (diffDays === 0) textDays = 'HOY';
@@ -80,6 +72,7 @@ export default async function handler(req, res) {
                     token: tokenAdmin
                 };
 
+                // Enviar la notificación al teléfono
                 await admin.messaging().send(mensaje);
                 notificacionesEnviadas++;
             }
@@ -89,6 +82,6 @@ export default async function handler(req, res) {
 
     } catch (error) {
         console.error('Error en cron de recibos:', error);
-        return res.status(500).json({ success: false, error: error.message });
+        return res.status(500).json({ success: false, error: error.message || 'Error desconocido' });
     }
 }
