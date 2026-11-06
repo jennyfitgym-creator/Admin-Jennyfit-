@@ -81,6 +81,8 @@
         .client-card.status-active::before { background: var(--primary); }
         .client-card.status-warning::before { background: var(--gold); }
         .client-card.status-expired::before { background: var(--danger); }
+        .client-card.status-deleted::before { background: var(--muted); }
+        .client-card.status-deleted { opacity: 0.7; }
         
         .client-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
         .client-name { font-size: 1.1rem; font-weight: 900; color: var(--text); }
@@ -88,6 +90,7 @@
         .badge-active { background: rgba(57, 255, 20, 0.15); color: var(--primary); }
         .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--gold); }
         .badge-expired { background: rgba(255, 42, 42, 0.15); color: var(--danger); }
+        .badge-deleted { background: rgba(161, 161, 170, 0.15); color: var(--muted); }
         
         .client-info { font-size: 0.8rem; color: var(--muted); line-height: 1.6; margin-bottom: 15px; display: flex; flex-direction: column; gap: 4px; }
         .client-info span { display: flex; align-items: center; gap: 6px; }
@@ -106,8 +109,9 @@
         .btn-delete-user { background: rgba(255, 42, 42, 0.1); color: var(--danger); }
         .btn-block { background: rgba(255, 42, 42, 0.05); border: 1px solid var(--danger); color: var(--danger); }
         
-        /* NUEVO BOTÓN DESBLOQUEAR */
+        /* NUEVOS BOTONES */
         .btn-unblock { background: rgba(57, 255, 20, 0.1); border: 1px solid var(--primary); color: var(--primary); }
+        .btn-restore { background: rgba(57, 255, 20, 0.15); border: 1px solid var(--primary); color: var(--primary); grid-column: span 2; }
 
         .btn-whatsapp { background: rgba(37, 211, 102, 0.1); color: #25D366; border: 1px solid #25D366; }
         .btn-1mes { background: rgba(57, 255, 20, 0.1); color: var(--primary); border: 1px solid var(--primary); }
@@ -221,6 +225,7 @@
                 <button class="filter-tab" data-filter="activos" onclick="cambiarFiltro('activos')">Activos</button>
                 <button class="filter-tab" data-filter="proximos" onclick="cambiarFiltro('proximos')">Por Vencer</button>
                 <button class="filter-tab" data-filter="vencidos" onclick="cambiarFiltro('vencidos')">Vencidos</button>
+                <button class="filter-tab" data-filter="eliminados" onclick="cambiarFiltro('eliminados')">Eliminados</button>
             </div>
 
             <div id="loading-clients" class="loading-text">⏳ Cargando...</div>
@@ -886,6 +891,7 @@
                         if (data.jennyfit_username) {
                             idsActuales.add(doc.id);
                             const fechaReg = parseInt((data._syncMeta ? data._syncMeta.ultimaActualizacion : 0) || data.jennyfit_last_ts || 0);
+                            const eliminado = data.jennyfit_cuenta_eliminada === true;
 
                             if (data.jennyfit_mi_codigo) {
                                 mapaUsuariosNombres[data.jennyfit_mi_codigo] = data.jennyfit_username;
@@ -901,7 +907,8 @@
                                 fechaRegistro: fechaReg,
                                 referidoPor: data.jennyfit_referido_por || null,
                                 referidoPagado: data.jennyfit_referido_pagado === true || data.jennyfit_referido_pagado === 'true',
-                                misReferidosValidados: parseInt(data.jennyfit_referidos_validados || '0')
+                                misReferidosValidados: parseInt(data.jennyfit_referidos_validados || '0'),
+                                eliminado: eliminado
                             });
                         }
                     });
@@ -910,7 +917,7 @@
                         snapshot.forEach((doc) => {
                             if (!clientesConocidosUIDs.has(doc.id)) {
                                 const data = doc.data();
-                                if (data.jennyfit_username) {
+                                if (data.jennyfit_username && data.jennyfit_cuenta_eliminada !== true) {
                                     navigator.vibrate([200, 100, 200]);
                                     mostrarAlertaNuevoCliente(data.jennyfit_username);
                                 }
@@ -947,7 +954,7 @@
             filtrarYRenderizar();
         };
 
-        // 🚨 RENDERIZADO DE TARJETAS CON BOTÓN DINÁMICO BLOQUEAR/DESBLOQUEAR 🚨
+        // 🚨 RENDERIZADO DE TARJETAS CON PAPELERA DE RECICLAJE 🚨
         window.filtrarYRenderizar = function() {
             const textoBusqueda = document.getElementById('search-client').value.toLowerCase().trim();
             const ahora = Date.now();
@@ -956,6 +963,14 @@
             const clientesFiltrados = clientesArrayGlobal.filter(cliente => {
                 const matchTexto = cliente.nombre.toLowerCase().includes(textoBusqueda) || cliente.email.toLowerCase().includes(textoBusqueda) || cliente.cedula.includes(textoBusqueda);
                 if (!matchTexto) return false;
+                
+                // 🚨 LÓGICA DE FILTRADO CON ELIMINADOS 🚨
+                if (filtroActual === 'eliminados') {
+                    return cliente.eliminado === true;
+                } else {
+                    if (cliente.eliminado === true) return false; // Ocultar eliminados en otras pestañas
+                }
+
                 const activo = cliente.expiraMs > ahora;
                 const diasRestantes = (cliente.expiraMs - ahora) / (1000 * 60 * 60 * 24);
                 if (filtroActual === 'activos') return activo && diasRestantes > 5;
@@ -964,16 +979,23 @@
                 return true;
             });
 
-            if (clientesFiltrados.length === 0) { clientsContainer.innerHTML = '<div class="empty-state">No hay clientes.</div>'; return; }
+            if (clientesFiltrados.length === 0) { 
+                clientsContainer.innerHTML = `<div class="empty-state">No hay clientes ${filtroActual === 'eliminados' ? 'eliminados' : 'en esta lista'}.</div>`; 
+                return; 
+            }
 
             clientesFiltrados.forEach(cliente => {
-                const activo = cliente.expiraMs > Date.now();
-                const diasRestantes = (cliente.expiraMs - Date.now()) / (1000 * 60 * 60 * 24);
                 let claseCard = 'status-expired'; let claseBadge = 'badge-expired'; let textoEstado = 'Vencido';
                 
-                if (activo) {
-                    if (diasRestantes <= 5) { claseCard = 'status-warning'; claseBadge = 'badge-warning'; textoEstado = `Vence en ${Math.ceil(diasRestantes)} días`; }
-                    else { claseCard = 'status-active'; claseBadge = 'badge-active'; textoEstado = `Activo`; }
+                if (cliente.eliminado) {
+                    claseCard = 'status-deleted'; claseBadge = 'badge-deleted'; textoEstado = 'Eliminado';
+                } else {
+                    const activo = cliente.expiraMs > Date.now();
+                    const diasRestantes = (cliente.expiraMs - Date.now()) / (1000 * 60 * 60 * 24);
+                    if (activo) {
+                        if (diasRestantes <= 5) { claseCard = 'status-warning'; claseBadge = 'badge-warning'; textoEstado = `Vence en ${Math.ceil(diasRestantes)} días`; }
+                        else { claseCard = 'status-active'; claseBadge = 'badge-active'; textoEstado = `Activo`; }
+                    }
                 }
 
                 // LÓGICA VISUAL DE REFERIDOS
@@ -1016,11 +1038,38 @@
                 const card = document.createElement('div');
                 card.className = `client-card ${claseCard}`;
                 
-                // 🚨 LÓGICA PARA CAMBIAR EL BOTÓN DE BLOQUEAR A DESBLOQUEAR 🚨
-                // MODIFICADO: Se pasa solo el UID para evitar errores con nombres que tienen comillas
-                const botonBloqueo = activo 
-                    ? `<button class="btn-card btn-block" onclick="bloquearCliente('${cliente.uid}')">⛔ Bloquear</button>`
-                    : `<button class="btn-card btn-unblock" onclick="abrirModalFecha('${cliente.uid}', '${cliente.nombre}', ${cliente.expiraMs})">🔓 Desbloquear</button>`;
+                let botonesHtml = '';
+
+                // 🚨 SI ESTÁ ELIMINADO: Mostrar solo botón de restaurar 🚨
+                if (cliente.eliminado) {
+                    botonesHtml = `
+                        <div class="card-actions">
+                            <button class="btn-card btn-restore" onclick="restaurarCliente('${cliente.uid}')">♻️ Restaurar Cliente</button>
+                        </div>
+                    `;
+                } else {
+                    // SI NO ESTÁ ELIMINADO: Mostrar todos los botones normales
+                    const activo = cliente.expiraMs > Date.now();
+                    const botonBloqueo = activo 
+                        ? `<button class="btn-card btn-block" onclick="bloquearCliente('${cliente.uid}')">⛔ Bloquear</button>`
+                        : `<button class="btn-card btn-unblock" onclick="abrirModalFecha('${cliente.uid}', '${cliente.nombre}', ${cliente.expiraMs})">🔓 Desbloquear</button>`;
+
+                    botonesHtml = `
+                        <div class="card-actions" style="grid-template-columns: 1fr 1fr;">
+                            <button class="btn-card btn-edit" onclick="abrirModalFecha('${cliente.uid}', '${cliente.nombre}', ${cliente.expiraMs})">📅 Fecha</button>
+                            <button class="btn-card btn-1mes" onclick="extenderUnMes('${cliente.uid}', '${cliente.nombre}', ${cliente.expiraMs})">⚡ +1 Mes</button>
+                            
+                            <button class="btn-card btn-ver-entrenos" style="grid-column: span 2;" onclick="verEntrenosCliente('${cliente.uid}', '${cliente.nombre}')">👁️ Ver Entrenos</button>
+                            
+                            <button class="btn-card btn-whatsapp" onclick="enviarWhatsAppCliente('${cliente.nombre}', '${cliente.telefono}', ${cliente.expiraMs})">📲 WhatsApp</button>
+                            <button class="btn-card btn-history" onclick="borrarHistorialCliente('${cliente.uid}', '${cliente.nombre}')">🧹 Historial</button>
+                            
+                            ${botonBloqueo}
+                            
+                            <button class="btn-card btn-delete-user" onclick="eliminarCliente('${cliente.uid}')">🗑️ Eliminar</button>
+                        </div>
+                    `;
+                }
 
                 card.innerHTML = `
                     <div class="client-header">
@@ -1032,20 +1081,9 @@
                         <span>🪪 ${cliente.cedula} | 📲 ${cliente.telefono}</span>
                         <span>📅 Vence: ${cliente.expiraMs > 0 ? new Date(cliente.expiraMs).toLocaleDateString('es-VE') : 'Sin activar / Bloqueado'}</span>
                     </div>
-                    ${refHtml}
-                    <div class="card-actions" style="grid-template-columns: 1fr 1fr;">
-                        <button class="btn-card btn-edit" onclick="abrirModalFecha('${cliente.uid}', '${cliente.nombre}', ${cliente.expiraMs})">📅 Fecha</button>
-                        <button class="btn-card btn-1mes" onclick="extenderUnMes('${cliente.uid}', '${cliente.nombre}', ${cliente.expiraMs})">⚡ +1 Mes</button>
-                        
-                        <button class="btn-card btn-ver-entrenos" style="grid-column: span 2;" onclick="verEntrenosCliente('${cliente.uid}', '${cliente.nombre}')">👁️ Ver Entrenos</button>
-                        
-                        <button class="btn-card btn-whatsapp" onclick="enviarWhatsAppCliente('${cliente.nombre}', '${cliente.telefono}', ${cliente.expiraMs})">📲 WhatsApp</button>
-                        <button class="btn-card btn-history" onclick="borrarHistorialCliente('${cliente.uid}', '${cliente.nombre}')">🧹 Historial</button>
-                        
-                        ${botonBloqueo}
-                        
-                        <button class="btn-card btn-delete-user" onclick="eliminarCliente('${cliente.uid}')">🗑️ Eliminar</button>
-                    </div>`;
+                    ${cliente.eliminado ? '' : refHtml}
+                    ${botonesHtml}
+                `;
                 clientsContainer.appendChild(card);
             });
         };
@@ -1254,16 +1292,35 @@
             });
         };
 
+        // 🚨 LÓGICA DE ELIMINAR (A la papelera) 🚨
         window.eliminarCliente = function(uid) {
             const cliente = clientesArrayGlobal.find(c => c.uid === uid);
             const nombre = cliente ? cliente.nombre : 'el cliente';
 
-            abrirModalConfirm("Eliminar Cliente", `⚠️ ¿Eliminar definitivamente a ${nombre}? Si vuelve a entrar, tendrá que registrarse de nuevo.`, async () => {
+            abrirModalConfirm("Eliminar Cliente", `⚠️ ¿Mover a ${nombre} a la papelera de eliminados? Se le bloqueará la app (membresía en 0).`, async () => {
                 try {
-                    await deleteDoc(doc(db, "usuarios", uid));
-                    clientesConocidosUIDs.delete(uid);
-                    localStorage.setItem('jennyfit_admin_known_uids', JSON.stringify(Array.from(clientesConocidosUIDs)));
+                    await updateDoc(doc(db, "usuarios", uid), {
+                        jennyfit_membership_expiry: "0",
+                        jennyfit_cuenta_eliminada: true
+                    });
+                    alert(`✅ Cliente ${nombre} movido a eliminados y bloqueado.`);
                 } catch (error) { alert("Error al eliminar: " + error.message); }
+            });
+        };
+
+        // 🚨 NUEVA FUNCIÓN: RESTAURAR CLIENTE 🚨
+        window.restaurarCliente = function(uid) {
+            const cliente = clientesArrayGlobal.find(c => c.uid === uid);
+            const nombre = cliente ? cliente.nombre : 'el cliente';
+
+            abrirModalConfirm("Restaurar Cliente", `¿Estás seguro de restaurar a ${nombre}? Volverá a la lista principal y podrás asignarle una nueva fecha de membresía.`, async () => {
+                try {
+                    await updateDoc(doc(db, "usuarios", uid), {
+                        jennyfit_cuenta_eliminada: false
+                    });
+                    alert(`♻️ Cliente ${nombre} restaurado con éxito.`);
+                    cambiarFiltro('todos'); // Cambiar a la vista normal
+                } catch (error) { alert("Error al restaurar: " + error.message); }
             });
         };
 
