@@ -1592,7 +1592,7 @@
             try {
                 const res = await fetch('https://jennyv2.vercel.app/api/enviar-notificacion', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title, body, image, topic: 'noticias_jennyfit', secret: 'Yoabreu2027' })
+                    body: JSON.stringify({ title, body, image, topic: 'noticias_jennyfit', secret: 'YoAbreu2027' })
                 });
                 if (!res.ok) throw new Error(await res.text());
                 const data = await res.json();
