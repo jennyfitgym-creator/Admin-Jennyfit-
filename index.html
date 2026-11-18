@@ -1001,7 +1001,7 @@
                         body: 'Si ves esto, el Push y Vercel funcionan.',
                         image: 'https://admin-jennyfit.vercel.app/icono-admin-192.png',
                         token: tokenAdminFCM,
-                        secret: 'JENNYFIT_ADMIN_2026'
+                        secret: 'YoAbreu2027'
                     })
                 });
                 const data = await res.json();
@@ -1592,7 +1592,7 @@
             try {
                 const res = await fetch('https://jennyv2.vercel.app/api/enviar-notificacion', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title, body, image, topic: 'noticias_jennyfit', secret: 'JENNYFIT_ADMIN_2026' })
+                    body: JSON.stringify({ title, body, image, topic: 'noticias_jennyfit', secret: 'Yoabreu2027' })
                 });
                 if (!res.ok) throw new Error(await res.text());
                 const data = await res.json();
